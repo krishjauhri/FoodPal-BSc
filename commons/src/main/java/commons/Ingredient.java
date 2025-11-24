@@ -11,6 +11,9 @@ public class Ingredient {
     public Ingredient() {}
 
     public Ingredient(String name, int amount, String unit) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than 0");
+        }
         this.name = name;
         this.amount = amount;
         this.unit = unit;
@@ -29,7 +32,9 @@ public class Ingredient {
     }
 
     public void setAmount(int amount) {
-        this.amount = amount;
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than 0");
+        }this.amount = amount;
     }
 
     public String getUnit() {
