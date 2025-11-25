@@ -8,13 +8,20 @@ public class Recipe {
 
     private long id;
     private String name;
-    private List<RecipeIngredient> ingredients = new ArrayList<>();
+    private List<Ingredient> ingredients = new ArrayList<>();
     private List<Step> steps = new ArrayList<>();
 
     public Recipe() {
     }
 
-    public Recipe(String name, List<RecipeIngredient> ingredients, List<Step> steps) {
+    public Recipe(String name) {
+        this.name = name;
+        this.ingredients = new ArrayList<>();
+        this.steps = new ArrayList<>();
+    }
+
+
+    public Recipe(String name, List<Ingredient> ingredients, List<Step> steps) {
         this.name = name;
         this.ingredients = ingredients;
         this.steps = steps;
@@ -36,12 +43,12 @@ public class Recipe {
         this.name = name;
     }
 
-    public List<RecipeIngredient> getIngredients() {
+    public List<Ingredient> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<RecipeIngredient> ingredients) {
-        if (ingredients != null)
+    public void setIngredients(List<Ingredient> ingredients) {
+        if(ingredients != null)
             this.ingredients = ingredients;
         else
             this.ingredients = new ArrayList<>();
@@ -52,44 +59,43 @@ public class Recipe {
     }
 
     public void setSteps(List<Step> steps) {
-        if (steps != null)
+        if(steps != null)
             this.steps = steps;
         else
             this.steps = new ArrayList<>();
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Recipe recipe = (Recipe) object;
+        return Objects.equals(getName(), recipe.getName()) && Objects.equals(getIngredients(), recipe.getIngredients()) && Objects.equals(getSteps(), recipe.getSteps());
+    }
 
-    public boolean addIngredient(RecipeIngredient ingredient) {
-        if (ingredient != null) {
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getIngredients(), getSteps());
+    }
+
+    public boolean addIngredient(Ingredient ingredient){
+        if(ingredient != null){
             return ingredients.add(ingredient);
         }
         return false;
     }
 
-    public boolean removeIngredient(RecipeIngredient ingredient) {
+    public boolean removeIngredient(Ingredient ingredient){
         return ingredients.remove(ingredient);
     }
 
-    public boolean addStep(Step step) {
-        if (step != null) {
+    public boolean addStep(Step step){
+        if(step != null){
             return steps.add(step);
         }
         return false;
     }
 
-    public boolean removeStep(Step step) {
+    public boolean removeStep(Step step){
         return steps.remove(step);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Recipe recipe = (Recipe) o;
-        return id == recipe.id && Objects.equals(name, recipe.name) && Objects.equals(ingredients, recipe.ingredients) && Objects.equals(steps, recipe.steps);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, ingredients, steps);
     }
 }
