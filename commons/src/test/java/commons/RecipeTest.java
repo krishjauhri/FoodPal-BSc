@@ -12,28 +12,34 @@ class RecipeTest {
 
     private Recipe r1, r2;
     private Ingredient flour, water, coffee, sugar;
+    private RecipeIngredient flourRecipe, waterRecipe, coffeeRecipe, sugarRecipe;
     private Step s1, s2, s3, s4;
 
     @BeforeEach
     void setUp(){
-        flour = new Ingredient("Flour", 200, "g");
-        water = new Ingredient("Water", 100, "ml");
-        sugar = new Ingredient("Sugar", 20, "g");
-        coffee = new Ingredient("Coffee", 8, "tablespoons");
+        flour = new Ingredient("Flour", 2, 1, 4);
+        water = new Ingredient("Water", 1, 0, 0);
+        sugar = new Ingredient("Sugar", 3, 2, 5);
+        coffee = new Ingredient("Coffee", 8, 4, 1);
+
+        flourRecipe = new RecipeIngredient(flour, 100, "g");
+        waterRecipe = new RecipeIngredient(water, 50, "ml");
+        sugarRecipe = new RecipeIngredient(sugar, 25, "g");
+        coffeeRecipe = new RecipeIngredient(coffee, 100, "tablespoon");
 
         s1 = new Step(1, "Mix ingredients");
         s2 = new Step(2, "Let the dough rest");
         s3 = new Step(2, "Add the coffee");
         s4 = new Step(3, "Add the sugar");
 
-        List<Ingredient> ing1 = new ArrayList<>();
-        ing1.add(flour);
-        ing1.add(water);
+        List<RecipeIngredient> ing1 = new ArrayList<>();
+        ing1.add(flourRecipe);
+        ing1.add(waterRecipe);
 
-        List<Ingredient> ing2 = new ArrayList<>();
-        ing2.add(water);
-        ing2.add(coffee);
-        ing2.add(sugar);
+        List<RecipeIngredient> ing2 = new ArrayList<>();
+        ing2.add(waterRecipe);
+        ing2.add(coffeeRecipe);
+        ing2.add(sugarRecipe);
 
         List<Step> steps1 = new ArrayList<>();
         steps1.add(s1);
@@ -60,17 +66,19 @@ class RecipeTest {
 
     @Test
     void addIngredient() {
-        Ingredient salt = new Ingredient("Salt", 5, "g");
-        r1.addIngredient(salt);
-        assertTrue(r1.getIngredients().contains(salt));
+        Ingredient salt = new Ingredient("Salt", 5, 3, 1);
+        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100, "g");
+        r1.addIngredient(saltRecipe);
+        assertTrue(r1.getIngredients().contains(saltRecipe));
     }
 
     @Test
     void removeIngredient() {
-        Ingredient salt = new Ingredient("Salt", 5, "g");
-        r1.addIngredient(salt);
-        r1.removeIngredient(salt);
-        assertFalse(r1.getIngredients().contains(salt));
+        Ingredient salt = new Ingredient("Salt", 5, 3, 1);
+        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100, "g");
+        r1.addIngredient(saltRecipe);
+        r1.removeIngredient(saltRecipe);
+        assertFalse(r1.getIngredients().contains(saltRecipe));
     }
 
     @Test
