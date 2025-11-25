@@ -1,29 +1,23 @@
 package commons;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class User {
 
     private long id;
     private String name;
-
-    // TODO: Uncomment when Recipe class is created
-    // private List<Recipe> recipes = new ArrayList<>();
+    private List<Recipe> recipes = new ArrayList<>();
 
     public User() {}
 
-    // TODO: Uncomment when Recipe class is available
-    /*
     public User(long id, String name, List<Recipe> recipes) {
         this.id = id;
         this.name = name;
         this.recipes = recipes;
     }
-    */
 
-    // TODO: Uncomment when Recipe class is available
-    /*
     public boolean addRecipe(Recipe recipe) {
         if (recipe == null) return false;
         if (!recipes.contains(recipe)) {
@@ -47,7 +41,7 @@ public class User {
         }
         return null;
     }
-    */
+
 
     public long getId() {
         return id;
@@ -63,8 +57,7 @@ public class User {
         this.name = name;
     }
 
-    // TODO: Uncomment when Recipe class is available
-    /*
+
     public List<Recipe> getRecipes() {
         return recipes;
     }
@@ -72,21 +65,17 @@ public class User {
     public void setRecipes(List<Recipe> recipes) {
         this.recipes = recipes;
     }
-    */
+
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-
-        // TODO: Add recipes comparison when Recipe is available
-        return getId() == user.getId()
-                && Objects.equals(getName(), user.getName());
+        return getId() == user.getId() && Objects.equals(getName(), user.getName()) && Objects.equals(getRecipes(), user.getRecipes());
     }
 
     @Override
     public int hashCode() {
-        // TODO: Add recipes into hashCode when Recipe exists
-        return Objects.hash(getId(), getName());
+        return Objects.hash(getId(), getName(), getRecipes());
     }
 }
