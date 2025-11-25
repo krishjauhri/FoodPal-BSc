@@ -7,12 +7,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class IngredientTest {
 
-    private Ingredient i1, i2;
+    private Ingredient i1, i2, i3;
 
     @BeforeEach
     void setUp() {
-        i1 = new Ingredient("butter", 100, "g");
-        i2 = new Ingredient("butter", 100, "g");
+        i1 = new Ingredient("Flour", 2, 3,2);
+        i2 = new Ingredient("Flour", 2, 3,2);
+        i3 = new Ingredient("", 1, 1,0);
     }
 
     @Test
