@@ -5,13 +5,15 @@
 
 <module name="Checker">
 
-    <module name="FileTabCharacter"/>
-
     <module name="FileLength">
-        <property name="max" value="5000"/>
+        <property name="max" value="50000"/>
     </module>
 
-    <module name="NewlineAtEndOfFile"/>
+    <module name="SuppressWarningsFilter"/>
+
+    <module name="SeverityMatchFilter"/>
+
+    <module name="SuppressionCommentFilter"/>
 
     <module name="Translation"/>
 
@@ -19,17 +21,14 @@
 
         <module name="UnusedImports"/>
 
-        <module name="TrailingComment"/>
+        <module name="RedundantImport"/>
+
+        <module name="OuterTypeFilename"/>
+
+        <module name="EmptyCatchBlock"/>
 
         <module name="EmptyStatement"/>
 
-        <module name="MagicNumber">
-            <property name="ignoreNumbers" value="0,1,-1,100,2,3,4,5"/>
-        </module>
-
-        <module name="SimplifyBooleanExpression"/>
-
-        <module name="EmptyLineSeparator"/>
     </module>
 
 
