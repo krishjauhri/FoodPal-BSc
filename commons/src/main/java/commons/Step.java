@@ -54,14 +54,14 @@ public class Step {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) return false;
-        Step step = (Step) object;
-        return id == step.id;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Step step = (Step) o;
+        return id == step.id && stepOrder == step.stepOrder && Objects.equals(text, step.text) && Objects.equals(recipe, step.recipe);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, stepOrder, text, recipe);
     }
 }

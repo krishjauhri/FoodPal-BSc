@@ -79,7 +79,19 @@ class RecipeTest {
         RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100, "g");
         r1.addIngredient(saltRecipe);
         r1.removeIngredient(saltRecipe);
-        assertFalse(r1.getIngredients().contains(saltRecipe));
+        boolean saltStillPresent = false;
+
+        for (int i = 0; i < r1.getIngredients().size(); i++) {
+            RecipeIngredient ri = r1.getIngredients().get(i);
+            boolean sameName = ri.getIngredient().getName().equals("Salt");
+            boolean sameAmount = Double.compare(ri.getAmount(), 100) == 0;
+            boolean sameUnit = ri.getUnit().equals("g");
+            if (sameName && sameAmount && sameUnit) {
+                saltStillPresent = true;
+                break;
+            }
+        }
+        assertFalse(saltStillPresent);
     }
 
     @Test
