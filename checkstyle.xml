@@ -7,20 +7,14 @@
     <module name="TreeWalker">
         <module name="UnusedImports" />
 
-        <module name="MissingJavadocMethod">
-            <property name="scope" value="public"/>
-            <property name="excludeScope" value="package"/>
-            <property name="allowMissingPropertyJavadoc" value="true"/>
-            <property name="minLineCount" value="1"/>
-            <property name="allowGetterSetter" value="true"/>
-        </module>
-
         <module name="MethodLength">
             <property name="max" value="75"/>
         </module>
 
         <module name="AvoidStarImport"/>
+
         <module name="RedundantImport"/>
+
         <module name="Indentation"/>
 
         <module name="CyclomaticComplexity">
@@ -36,6 +30,8 @@
         <module name="WhitespaceAfter"/>
 
         <module name="EmptyLineSeparator"/>
+
+        <module name="EmptyCatchBlock"/>
     </module>
 
 
