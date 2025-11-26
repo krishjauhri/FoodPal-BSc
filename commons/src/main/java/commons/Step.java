@@ -28,7 +28,7 @@ public class Step {
     public Step(Recipe recipe,int order, String text){
         this.recipe = recipe;
         this.stepOrder = order;
-        this.text = text;;
+        this.text = text;
     }
 
     public Recipe getRecipe() {return recipe;}
