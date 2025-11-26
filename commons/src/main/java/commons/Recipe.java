@@ -1,14 +1,22 @@
 package commons;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Entity
 public class Recipe {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
+
+    @OneToMany()
     private List<RecipeIngredient> ingredients = new ArrayList<>();
+    @OneToMany()
     private List<Step> steps = new ArrayList<>();
 
     public Recipe() {

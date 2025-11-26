@@ -52,7 +52,8 @@ class RecipeTest {
 
         r1 = new Recipe("Dough", ing1, steps1);
         r2 = new Recipe("Latte", ing2, steps2);
-
+        r1.setId(1L);
+        r2.setId(2L);
     }
     @Test
     void testEquals() {
