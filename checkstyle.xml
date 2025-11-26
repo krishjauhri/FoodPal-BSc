@@ -13,8 +13,6 @@
 
     <module name="SeverityMatchFilter"/>
 
-    <module name="SuppressionCommentFilter"/>
-
     <module name="Translation"/>
 
     <module name="TreeWalker">
@@ -25,9 +23,11 @@
 
         <module name="OuterTypeFilename"/>
 
+        <module name="EmptyStatement"/>
+
         <module name="EmptyCatchBlock"/>
 
-        <module name="EmptyStatement"/>
+        <module name="FinalParameters"/>
 
     </module>
 
