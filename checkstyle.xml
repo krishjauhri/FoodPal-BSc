@@ -7,14 +7,11 @@
     <module name="TreeWalker">
         <module name="UnusedImports" />
 
-        <module name="UnusedImports"/>
-
         <module name="MissingJavadocMethod">
             <property name="scope" value="public"/>
             <property name="excludeScope" value="package"/>
             <property name="allowMissingPropertyJavadoc" value="true"/>
             <property name="minLineCount" value="1"/>
-            <property name="ignoreMethodNames" value="equals,hashCode"/>
             <property name="allowGetterSetter" value="true"/>
         </module>
 
@@ -37,7 +34,6 @@
         <module name="NeedBraces"/>
 
         <module name="WhitespaceAfter"/>
-
 
         <module name="EmptyLineSeparator"/>
     </module>
