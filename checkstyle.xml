@@ -27,7 +27,7 @@
 
         <module name="EmptyCatchBlock"/>
 
-        <module name="FinalParameters"/>
+        <module name="EqualsHashCode"/>
 
     </module>
 
