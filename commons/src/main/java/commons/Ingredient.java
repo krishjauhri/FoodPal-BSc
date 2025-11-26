@@ -1,9 +1,18 @@
 package commons;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.util.Objects;
 
+@Entity
 public class Ingredient {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private String name;
     private double protein;
     private double fat;
@@ -18,6 +27,7 @@ public class Ingredient {
         this.fat = fat;
         this.carbs = carbs;
     }
+    public long getId() {return id;}
 
     public String getName() {
         return name;
@@ -68,6 +78,6 @@ public class Ingredient {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, protein, fat, carbs);
+        return Objects.hash( name, protein, fat, carbs);
     }
 }

@@ -1,14 +1,22 @@
 package commons;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Entity
 public class Recipe {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
+
+    @OneToMany()
     private List<RecipeIngredient> ingredients = new ArrayList<>();
+    @OneToMany()
     private List<Step> steps = new ArrayList<>();
 
     public Recipe() {
@@ -60,14 +68,30 @@ public class Recipe {
 
 
     public boolean addIngredient(RecipeIngredient ingredient) {
-        if (ingredient != null) {
-            return ingredients.add(ingredient);
+        if (ingredient == null) {
+            return false;
         }
-        return false;
+        ingredients.add(ingredient);
+        ingredient.setRecipe(this);
+        return true;
     }
 
     public boolean removeIngredient(RecipeIngredient ingredient) {
-        return ingredients.remove(ingredient);
+        if (ingredient == null) {
+            return false;
+        }
+        for (int i = 0; i < ingredients.size(); i++) {
+            RecipeIngredient current = ingredients.get(i);
+            boolean sameIngredient = Objects.equals(current.getIngredient(), ingredient.getIngredient());
+            boolean sameAmount = Double.compare(current.getAmount(), ingredient.getAmount()) == 0;
+            boolean sameUnit = Objects.equals(current.getUnit(), ingredient.getUnit());
+
+            if (sameIngredient && sameAmount && sameUnit) {
+                ingredients.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean addStep(Step step) {
@@ -78,18 +102,25 @@ public class Recipe {
     }
 
     public boolean removeStep(Step step) {
-        return steps.remove(step);
+        if (step == null) {
+            return false;
+        }
+        boolean removed = steps.remove(step);
+        if (removed) {
+            step.setRecipe(null);
+        }
+        return removed;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Recipe recipe = (Recipe) o;
-        return id == recipe.id && Objects.equals(name, recipe.name) && Objects.equals(ingredients, recipe.ingredients) && Objects.equals(steps, recipe.steps);
+        return Objects.equals(name, recipe.name) && Objects.equals(ingredients, recipe.ingredients) && Objects.equals(steps, recipe.steps);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, ingredients, steps);
+        return Objects.hash( name, ingredients, steps);
     }
 }
