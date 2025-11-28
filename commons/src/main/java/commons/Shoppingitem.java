@@ -3,6 +3,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 
 import java.util.Objects;
@@ -22,6 +26,7 @@ public class Shoppingitem {
     private Shoppingitem() {
 
     }
+
 
 
     public Shoppingitem(String ingredientName, double amount, String unit, String sourceRecipe) {
@@ -62,22 +67,20 @@ public class Shoppingitem {
     public void setSourceRecipe(String sourceRecipe) {
         this.sourceRecipe = sourceRecipe;
     }
-    @Override
-    public String toString() {
-        return getIngredientName();
-    }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Shoppingitem that = (Shoppingitem) o;
-        return Double.compare(amount, that.amount) == 0 &&
-                Objects.equals(ingredientName, that.ingredientName) && Objects.equals(unit, that.unit) &&
-                Objects.equals(sourceRecipe, that.sourceRecipe);
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ingredientName, amount, unit, sourceRecipe);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
+    }
+
 }
