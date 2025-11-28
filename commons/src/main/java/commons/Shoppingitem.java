@@ -1,14 +1,28 @@
 package commons;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 
 import java.util.Objects;
 
+@Entity
 public class Shoppingitem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String ingredientName;
     private double amount;
     private String unit;
 
     //The name of the recipe where the item came from
     private String sourceRecipe;
+
+    @SuppressWarnings("unused")
+    private Shoppingitem() {
+
+    }
+
 
     public Shoppingitem(String ingredientName, double amount, String unit, String sourceRecipe) {
         this.ingredientName = ingredientName;

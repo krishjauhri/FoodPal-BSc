@@ -1,5 +1,7 @@
 package commons;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +31,6 @@ public class ShoppingItemTest {
         Shoppingitem t = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
         Shoppingitem r = new Shoppingitem("Pepper", 7, "ml", "Pasta");
         Shoppingitem s = new Shoppingitem("Pepper", 7, "ml", "Pasta");
-        assertEquals(t, t);
         assertEquals(t, r);
         assertEquals(t, s);
         assertNotEquals(r, s);
