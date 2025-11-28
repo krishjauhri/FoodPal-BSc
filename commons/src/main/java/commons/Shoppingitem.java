@@ -1,35 +1,36 @@
 package commons;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-
-import java.util.Objects;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Shoppingitem {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public long id;
+
     private String ingredientName;
     private double amount;
     private String unit;
-
-    //The name of the recipe where the item came from
+    // The name of the recipe where the item came from
     private String sourceRecipe;
 
     @SuppressWarnings("unused")
     private Shoppingitem() {
-
+        // for object mappers
     }
 
-
-
-    public Shoppingitem(String ingredientName, double amount, String unit, String sourceRecipe) {
+    public Shoppingitem(String ingredientName, double amount, String unit,
+                        String sourceRecipe) {
         this.ingredientName = ingredientName;
         this.amount = amount;
         this.unit = unit;
@@ -82,5 +83,4 @@ public class Shoppingitem {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
-
 }
