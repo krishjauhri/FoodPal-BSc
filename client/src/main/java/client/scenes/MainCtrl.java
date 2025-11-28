@@ -46,7 +46,7 @@ public class MainCtrl {
     public void showOverview() {
         primaryStage.setTitle("Quotes: Overview");
         primaryStage.setScene(overview);
-        //overviewCtrl.refresh();
+        overviewCtrl.refresh();
     }
 
     public void showAdd() {
