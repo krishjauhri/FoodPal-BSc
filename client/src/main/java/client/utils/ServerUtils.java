@@ -34,6 +34,8 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 
+import commons.Recipe;
+
 public class ServerUtils {
 
 	private static final String SERVER = "http://localhost:8080/";
@@ -74,6 +76,7 @@ public class ServerUtils {
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
     }
+
 
 	public boolean isServerAvailable() {
 		try {

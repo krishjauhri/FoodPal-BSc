@@ -24,14 +24,14 @@ public class MainCtrl {
 
     private Stage primaryStage;
 
-    private RecipeOverviewCtrl overviewCtrl;
+    private FoodPalMainCtrl overviewCtrl;
     private Scene overview;
 
     private AddQuoteCtrl addCtrl;
     private Scene add;
 
-    public void initialize(Stage primaryStage, Pair<RecipeOverviewCtrl, Parent> overview,
-            Pair<AddQuoteCtrl, Parent> add) {
+    public void initialize(Stage primaryStage, Pair<FoodPalMainCtrl, Parent> overview,
+                           Pair<AddQuoteCtrl, Parent> add) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
