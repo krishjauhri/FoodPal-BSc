@@ -28,6 +28,7 @@ import java.util.List;
 import org.glassfish.jersey.client.ClientConfig;
 
 import commons.Quote;
+import commons.Recipe;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -60,6 +61,19 @@ public class ServerUtils {
 				.request(APPLICATION_JSON) //
 				.post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
 	}
+    public List<Recipe> getRecipes() {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/recipes")
+                .request(APPLICATION_JSON)
+                .get(new GenericType<List<Recipe>>() {});
+    }
+
+    public Recipe addRecipe(Recipe recipe) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/recipes")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
+    }
 
 	public boolean isServerAvailable() {
 		try {

@@ -1,0 +1,8 @@
+2025-11-28 15:39:40.580197+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "NAME" not found; SQL statement:
+SELECT *
+from NAME [42102-232]
+2025-11-28 15:39:53.368418+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "NAME" not found; SQL statement:
+SELECT *
+FROM NAME [42102-232]
