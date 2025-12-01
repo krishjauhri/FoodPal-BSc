@@ -97,4 +97,11 @@ public class RecipeIngredient {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        if (ingredient == null) return "Unknown ingredient";
+        return amount + " " + unit + " " + ingredient.getName();
+    }
+
 }

@@ -49,5 +49,29 @@ public class RecipeController {
         return ingredientRepository.save(ingredient);
     }
 
+    @PutMapping("/{recipeId}/ingredients/{riId}")
+    public ResponseEntity<Recipe> updateIngredient(
+            @PathVariable Long recipeId,
+            @PathVariable Long riId,
+            @RequestBody UpdateIngredientRequest req){
+
+        Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount, req.unit);
+        return ResponseEntity.ok(updated);
+    }
+    public record UpdateIngredientRequest(double amount, String unit){}
+
+    @DeleteMapping("/{recipeId}/ingredients/{riId}")
+    public ResponseEntity<Recipe> deleteIngredient(
+            @PathVariable Long recipeId,
+            @PathVariable Long riId){
+
+        try {
+            recipeService.deleteIngredient(recipeId, riId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
 

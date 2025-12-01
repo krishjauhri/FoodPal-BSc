@@ -30,6 +30,45 @@ public class FoodPalMainCtrl {
     @FXML
     private VBox stepsBox;
 
+    @FXML
+    private ListView<RecipeIngredient> ingredientsList;
+
+    @FXML
+    private void addIngredient() {
+        Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) return; // no recipe selected
+
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Add Ingredient");
+        nameDialog.setHeaderText("Enter ingredient name:");
+        nameDialog.setContentText("Name:");
+        var nameResult = nameDialog.showAndWait();
+        if (nameResult.isEmpty()) return;
+        String name = nameResult.get();
+
+        TextInputDialog amountDialog = new TextInputDialog();
+        amountDialog.setTitle("Amount");
+        amountDialog.setHeaderText("Enter amount:");
+        amountDialog.setContentText("Amount (Example: 200):");
+        var amountResult = amountDialog.showAndWait();
+        if (amountResult.isEmpty()) return;
+        double amount = Double.parseDouble(amountResult.get());
+
+        TextInputDialog unitDialog = new TextInputDialog();
+        unitDialog.setTitle("Unit");
+        unitDialog.setHeaderText("Enter unit:");
+        unitDialog.setContentText("Unit (g, ml, pcs, ...):");
+        var unitResult = unitDialog.showAndWait();
+        if (unitResult.isEmpty()) return;
+        String unit = unitResult.get();
+
+        // Send to backend
+        var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
+        server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+
+        refresh(); // reload UI
+    }
+
 
     @Inject
     public FoodPalMainCtrl(ServerUtils server) {
@@ -62,21 +101,7 @@ public class FoodPalMainCtrl {
     public void showRecipe(Recipe recipe) {
         //recipe title
         recipeTitle.setText(recipe.getName());
-
-        //show ingredients
-        ingredientsBox.getChildren().clear();
-        if(recipe.getIngredients().isEmpty()){
-            ingredientsBox.getChildren().add(new Label("No ingredients found"));
-        }
-        else{
-            for(RecipeIngredient ingre : recipe.getIngredients()){
-                ingredientsBox.getChildren()
-                        .add(new Label(ingre.getAmount() + " "
-                                + ingre.getUnit() + " "
-                                + ingre.getIngredient().getName()));
-            }
-        }
-
+        showIngredients(recipe);
         //show preparation
         stepsBox.getChildren().clear();
         if(recipe.getSteps().isEmpty()){
@@ -90,7 +115,15 @@ public class FoodPalMainCtrl {
 
     }
 
-
+    private void showIngredients(Recipe recipe) {
+        ingredientsList.getItems().setAll(
+                recipe.getIngredients().stream()
+                        .filter(i -> i.getIngredient() != null)
+                        .filter(i -> i.getUnit() != null)
+                        .filter(i -> i.getAmount() > 0)
+                        .toList()
+        );
+    }
 
     public void refresh() {
         var recipes = server.getRecipes();              // GET /api/recipes
