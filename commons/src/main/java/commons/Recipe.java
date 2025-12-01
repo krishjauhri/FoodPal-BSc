@@ -1,5 +1,6 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,7 +15,8 @@ public class Recipe {
     private long id;
     private String name;
 
-    @OneToMany()
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     @OneToMany()
     private List<Step> steps = new ArrayList<>();

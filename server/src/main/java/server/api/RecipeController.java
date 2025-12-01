@@ -1,13 +1,14 @@
 package server.api;
 
+import commons.Ingredient;
 import commons.Recipe;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import commons.RecipeIngredient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import server.database.IngredientRepository;
 import server.database.RecipeRepository;
+import server.service.RecipeService;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @RestController
@@ -15,9 +16,13 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeRepository repo;
+    private final RecipeService recipeService;
+    private final IngredientRepository ingredientRepository;
 
-    public RecipeController(RecipeRepository repo) {
+    public RecipeController(RecipeRepository repo, RecipeService recipeService, IngredientRepository ingredientRepository) {
         this.repo = repo;
+        this.recipeService = recipeService;
+        this.ingredientRepository = ingredientRepository;
     }
 
     @PostMapping
@@ -28,6 +33,20 @@ public class RecipeController {
     @GetMapping
     public List<Recipe> getAll() {
         return repo.findAll();
+    }
+
+    @PostMapping("/{recipeId}/ingredients")
+    public ResponseEntity<Recipe> addIngredientToRecipe(
+            @PathVariable Long recipeId,
+            @RequestBody RecipeIngredient ingredient) {
+
+        Recipe updated = recipeService.addIngredient(recipeId, ingredient);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/ingredients")
+    public Ingredient createIngredient(@RequestBody Ingredient ingredient) {
+        return ingredientRepository.save(ingredient);
     }
 
 }
