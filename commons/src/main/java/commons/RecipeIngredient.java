@@ -1,5 +1,6 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class RecipeIngredient {
     private long id;
 
     @ManyToOne(optional = true)
+    @JsonBackReference
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
@@ -95,4 +97,11 @@ public class RecipeIngredient {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        if (ingredient == null) return "Unknown ingredient";
+        return amount + " " + unit + " " + ingredient.getName();
+    }
+
 }

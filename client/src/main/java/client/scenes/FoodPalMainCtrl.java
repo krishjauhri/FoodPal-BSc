@@ -17,7 +17,6 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 
-
 public class FoodPalMainCtrl {
 
     private final ServerUtils server;
@@ -37,6 +36,9 @@ public class FoodPalMainCtrl {
     @FXML
     private VBox stepsBox;
 
+    @FXML
+    private ListView<RecipeIngredient> ingredientsList;
+
     private ObservableList<Recipe> data;
 
     @Inject
@@ -46,12 +48,12 @@ public class FoodPalMainCtrl {
 
     @FXML
     public void initialize() {
-        // lijst initialiseren
+        // initialize list
         data = FXCollections.observableArrayList();
         colRecipeList.setItems(data);
         refreshRecipes();
 
-        // listener voor detailscherm
+        // listener for detail screen
         colRecipeList.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((observable, oldRecipe, newRecipe) -> {
@@ -77,10 +79,9 @@ public class FoodPalMainCtrl {
         dialog.showAndWait().ifPresent(name -> {
             if (!name.isBlank()) {
                 var recipe = new Recipe(name, new ArrayList<>(), new ArrayList<>());
-
                 var saved = server.addRecipe(recipe);
 
-                // voeg nieuwe recept toe aan de observable list
+                // add new recipe to the observable list
                 data.add(saved);
             }
         });
@@ -89,19 +90,7 @@ public class FoodPalMainCtrl {
     public void showRecipe(Recipe recipe) {
         // title
         recipeTitle.setText(recipe.getName());
-
-        // ingredients
-        ingredientsBox.getChildren().clear();
-        if (recipe.getIngredients().isEmpty()) {
-            ingredientsBox.getChildren().add(new Label("No ingredients found"));
-        } else {
-            for (RecipeIngredient ingre : recipe.getIngredients()) {
-                ingredientsBox.getChildren()
-                        .add(new Label(ingre.getAmount() + " "
-                                + ingre.getUnit() + " "
-                                + ingre.getIngredient().getName()));
-            }
-        }
+        showIngredients(recipe);
 
         // steps
         stepsBox.getChildren().clear();
@@ -112,6 +101,60 @@ public class FoodPalMainCtrl {
                 stepsBox.getChildren().add(new Label(step.getText()));
             }
         }
+
+
+    }
+
+    private void showIngredients(Recipe recipe) {
+        ingredientsList.getItems().setAll(
+                recipe.getIngredients().stream()
+                        .filter(i -> i.getIngredient() != null)
+                        .filter(i -> i.getUnit() != null)
+                        .filter(i -> i.getAmount() > 0)
+                        .toList()
+        );
+    }
+
+    @FXML
+    private void addIngredient() {
+        Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) return; // no recipe selected
+
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Add Ingredient");
+        nameDialog.setHeaderText("Enter ingredient name:");
+        nameDialog.setContentText("Name:");
+        var nameResult = nameDialog.showAndWait();
+        if (nameResult.isEmpty()) return;
+        String name = nameResult.get();
+
+        TextInputDialog amountDialog = new TextInputDialog();
+        amountDialog.setTitle("Amount");
+        amountDialog.setHeaderText("Enter amount:");
+        amountDialog.setContentText("Amount (Example: 200):");
+        var amountResult = amountDialog.showAndWait();
+        if (amountResult.isEmpty()) return;
+        double amount = Double.parseDouble(amountResult.get());
+
+        TextInputDialog unitDialog = new TextInputDialog();
+        unitDialog.setTitle("Unit");
+        unitDialog.setHeaderText("Enter unit:");
+        unitDialog.setContentText("Unit (g, ml, pcs, ...):");
+        var unitResult = unitDialog.showAndWait();
+        if (unitResult.isEmpty()) return;
+        String unit = unitResult.get();
+
+        // Send to backend
+        var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
+        server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+
+        refreshRecipes();// reload UI
+        Recipe updated = data.stream()
+                .filter(r -> r.getId() == recipe.getId())
+                .findFirst()
+                .orElse(recipe);
+
+        showRecipe(updated);
     }
 }
 

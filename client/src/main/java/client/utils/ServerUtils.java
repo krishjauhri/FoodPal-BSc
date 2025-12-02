@@ -25,6 +25,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import commons.Ingredient;
+import commons.RecipeIngredient;
 import org.glassfish.jersey.client.ClientConfig;
 
 import commons.Quote;
@@ -89,4 +91,36 @@ public class ServerUtils {
 		}
 		return true;
 	}
+
+    public Ingredient createIngredient(String name, double protein, double fat, double carbs) {
+        Ingredient ingredient = new Ingredient(name, protein, fat, carbs);
+
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/recipes/ingredients")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
+    }
+
+    public Recipe addIngredient(long recipeId, long ingredientId, double amount, String unit) {
+
+        RecipeIngredient ri = new RecipeIngredient();
+        ri.setAmount(amount);
+        ri.setUnit(unit);
+
+        Ingredient ref = new Ingredient();
+        ref.setId(ingredientId);
+        ri.setIngredient(ref);
+
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/recipes/" + recipeId + "/ingredients")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(ri, APPLICATION_JSON), Recipe.class);
+    }
+
+    public void deleteIngredient(long recipeId, long recipeIngredientId) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER).path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
 }
