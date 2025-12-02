@@ -207,5 +207,79 @@ public class FoodPalMainCtrl {
 
         showRecipe(updated);
     }
+
+    @FXML
+    private void editSelectedIngredient(){
+        Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selected = ingredientsList.getSelectionModel().getSelectedItem();
+
+        if(recipe == null || selected == null) return;
+
+        Double newAmount = askForNewAmount(selected);
+        if (newAmount == null) return;
+
+        String newUnit = askForNewUnit(selected);
+        if (newUnit == null) return;
+
+        updateIngredientOnServer(recipe, selected, newAmount, newUnit);
+
+        refreshRecipes();// reload UI
+        Recipe updated = data.stream()
+                .filter(r -> r.getId() == recipe.getId())
+                .findFirst()
+                .orElse(recipe);
+
+        showRecipe(updated);
+    }
+    private Double askForNewAmount(RecipeIngredient ri) {
+        TextInputDialog dialog = new TextInputDialog(String.valueOf(ri.getAmount()));
+        dialog.setTitle("Edit Ingredient");
+        dialog.setHeaderText("Edit amount for " + ri.getIngredient().getName());
+        dialog.setContentText("Amount:");
+
+        var result = dialog.showAndWait();
+        if (result.isEmpty()) return null;
+
+        try {
+            return Double.parseDouble(result.get());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount");
+            return null;
+        }
+    }
+
+    private String askForNewUnit(RecipeIngredient ri) {
+        TextInputDialog dialog = new TextInputDialog(ri.getUnit());
+        dialog.setTitle("Edit Ingredient");
+        dialog.setHeaderText("Edit unit for " + ri.getIngredient().getName());
+        dialog.setContentText("Unit:");
+
+        var result = dialog.showAndWait();
+        return result.orElse(null);
+    }
+
+    private void updateIngredientOnServer(
+            Recipe recipe, RecipeIngredient ri, double amount, String unit) {
+
+        server.updateIngredient(recipe.getId(), ri.getId(), amount, unit);
+    }
+
+    @FXML
+    private void deleteSelectedIngredient() {
+        Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selected = ingredientsList.getSelectionModel().getSelectedItem();
+
+        if (recipe == null || selected == null) return;
+
+        server.deleteIngredient(recipe.getId(), selected.getId());
+
+        refreshRecipes();
+        Recipe updated = data.stream()
+                .filter(r -> r.getId() == recipe.getId())
+                .findFirst()
+                .orElse(recipe);
+        showRecipe(updated);
+    }
+
 }
 
