@@ -14,7 +14,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class FoodPalMainCtrl {
@@ -40,6 +45,8 @@ public class FoodPalMainCtrl {
     private ListView<RecipeIngredient> ingredientsList;
 
     private ObservableList<Recipe> data;
+
+    private Recipe selectedRecipe;
 
     @Inject
     public FoodPalMainCtrl(ServerUtils server) {
@@ -88,6 +95,7 @@ public class FoodPalMainCtrl {
     }
 
     public void showRecipe(Recipe recipe) {
+        this.selectedRecipe = recipe;
         // title
         recipeTitle.setText(recipe.getName());
         showIngredients(recipe);
@@ -113,6 +121,49 @@ public class FoodPalMainCtrl {
                         .filter(i -> i.getAmount() > 0)
                         .toList()
         );
+    }
+
+    @FXML
+    public void downloadRecipe() {
+        if(selectedRecipe == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save recipe");
+        fileChooser.setInitialFileName(recipeTitle.getText() + ".md");
+        fileChooser.getExtensionFilters()
+                .add(new  FileChooser.ExtensionFilter("Markdown Files", "*.md"));
+        File file = fileChooser.showSaveDialog(null);
+        if (file == null) {
+            return;
+        }
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+            bw.write("# " + selectedRecipe.getName() + "\n\n");
+            bw.write("## Ingredients\n");
+            if(selectedRecipe.getIngredients().isEmpty()) {
+                bw.write("- No ingredients found\n");
+            }
+            else {
+                for(RecipeIngredient ri : selectedRecipe.getIngredients()) {
+                    bw.write("- " + ri.getAmount() + " " + ri.getUnit() + " " + ri.getIngredient().getName());
+                    bw.write("\n");
+                }
+            }
+            bw.write("\n");
+            bw.write("## Steps\n");
+            if(selectedRecipe.getSteps().isEmpty()) {
+                bw.write("- No steps found");
+            }
+            else {
+                for(Step step : selectedRecipe.getSteps()) {
+                    bw.write("- " + step.getOrder() + ". " + step.getText() + "\n");
+                }
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+
     }
 
     @FXML
