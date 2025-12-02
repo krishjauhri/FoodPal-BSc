@@ -56,7 +56,10 @@
 
                    <children>
                        <!--recipe tile-->
-                       <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
+                       <HBox spacing ="10">
+                           <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
+                           <Button text="Download" onAction="#downloadRecipe" />
+                       </HBox>
 
                        <!-- divider line -->
                        <Separator maxWidth="Infinity" />
