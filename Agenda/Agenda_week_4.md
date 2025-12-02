@@ -36,11 +36,3 @@
 ### 6. Feedback round (5 min)
 * Each member shares what can be improved
 
-
-
-* Creation of Issues
-
-## Feedback Round (5 min)
-* Each member briefly shares what went well and what could be improved.
-
-## Question Round (5 min)
