@@ -22,17 +22,15 @@
             <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
          </children>
       </HBox>
-       <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0"
-             style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
+       <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0" style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
            <children>
                <Label text="FoodPal" textAlignment="CENTER">
                    <font>
                        <Font name="System Bold" size="20.0" />
                    </font>
                </Label>
-               <Button text="Refresh" onAction="#refreshRecipes"/>
-               <Button fx:id="addRecipeButton" mnemonicParsing="false"
-                       onAction="#addRecipe" text="Add Recipe" />
+               <Button onAction="#refreshRecipes" text="Refresh" />
+               <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
            </children>
        </HBox>
 
@@ -66,6 +64,8 @@
                            <Label style="-fx-font-size: 14;" text="Ingredients:" />
                      <ListView fx:id="ingredientsList" prefHeight="200.0" prefWidth="200.0" />
                      <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add Ingredient" />
+                     <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit Ingredient" />
+                     <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete Ingredient" />
 
                            <VBox fx:id="ingredientsBox" spacing="5" />
                        </VBox>

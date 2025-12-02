@@ -117,6 +117,28 @@ public class ServerUtils {
                 .post(Entity.entity(ri, APPLICATION_JSON), Recipe.class);
     }
 
+    public static class UpdateIngredientRequest {
+        public double amount;
+        public String unit;
+
+        public UpdateIngredientRequest(double amount, String unit) {
+            this.amount = amount;
+            this.unit = unit;
+        }
+    }
+
+    public Recipe updateIngredient(long recipeId, long recipeIngredientId,
+                                   double amount, String unit) {
+
+        UpdateIngredientRequest body = new UpdateIngredientRequest(amount, unit);
+
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(body, APPLICATION_JSON), Recipe.class);
+    }
+
     public void deleteIngredient(long recipeId, long recipeIngredientId) {
         ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
