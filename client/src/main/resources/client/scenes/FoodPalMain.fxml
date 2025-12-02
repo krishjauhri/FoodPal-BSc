@@ -22,6 +22,20 @@
             <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
          </children>
       </HBox>
+       <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0"
+             style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
+           <children>
+               <Label text="FoodPal" textAlignment="CENTER">
+                   <font>
+                       <Font name="System Bold" size="20.0" />
+                   </font>
+               </Label>
+               <Button text="Refresh" onAction="#refreshRecipes"/>
+               <Button fx:id="addRecipeButton" mnemonicParsing="false"
+                       onAction="#addRecipe" text="Add Recipe" />
+           </children>
+       </HBox>
+
    </top>
    <center>
 

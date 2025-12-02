@@ -31,7 +31,7 @@ public class MainCtrl {
     private Scene add;
 
     public void initialize(Stage primaryStage, Pair<FoodPalMainCtrl, Parent> overview,
-            Pair<AddQuoteCtrl, Parent> add) {
+                           Pair<AddQuoteCtrl, Parent> add) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -44,9 +44,9 @@ public class MainCtrl {
     }
 
     public void showOverview() {
-        primaryStage.setTitle("Quotes: Overview");
+        primaryStage.setTitle("Recipes: Overview");
         primaryStage.setScene(overview);
-        overviewCtrl.refresh();
+        overviewCtrl.refreshRecipes();
     }
 
     public void showAdd() {
