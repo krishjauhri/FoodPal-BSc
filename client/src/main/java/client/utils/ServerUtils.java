@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import commons.Ingredient;
+import commons.Step;
 import commons.RecipeIngredient;
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -77,7 +78,6 @@ public class ServerUtils {
                 .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
     }
 
-
 	public boolean isServerAvailable() {
 		try {
 			ClientBuilder.newClient(new ClientConfig()) //
@@ -112,10 +112,25 @@ public class ServerUtils {
         ri.setIngredient(ref);
 
         return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/recipes/" + recipeId + "/ingredients")
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/ingredients")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(ri, APPLICATION_JSON), Recipe.class);
     }
+
+    public Recipe addStep(long recipeId, int order, String text) {
+
+        Step step = new Step();
+        step.setOrder(order);
+        step.setText(text);
+
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/steps")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(step, APPLICATION_JSON), Recipe.class);
+    }
+
 
     public static class UpdateIngredientRequest {
         public double amount;
@@ -139,10 +154,40 @@ public class ServerUtils {
                 .put(Entity.entity(body, APPLICATION_JSON), Recipe.class);
     }
 
+    public static class UpdateStepRequest {
+        public int order;
+        public String text;
+
+        public UpdateStepRequest(int order, String text) {
+            this.order = order;
+            this.text = text;
+        }
+    }
+
+    public Recipe updateStep(long recipeId, long stepId, int order, String text) {
+        UpdateStepRequest body = new UpdateStepRequest(order, text);
+
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/steps/" + stepId)
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(body, APPLICATION_JSON), Recipe.class);
+    }
+
     public void deleteIngredient(long recipeId, long recipeIngredientId) {
         ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER).path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
                 .request(APPLICATION_JSON)
                 .delete();
     }
+
+    public void deleteStep(long recipeId, long stepId) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/steps/" + stepId)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
+
 }
