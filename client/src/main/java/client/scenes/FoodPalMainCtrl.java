@@ -10,6 +10,7 @@ import client.utils.ServerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
@@ -280,6 +281,43 @@ public class FoodPalMainCtrl {
                 .orElse(recipe);
         showRecipe(updated);
     }
+    @FXML
+    public void cloneRecipe(){
+        if(selectedRecipe == null) return;
 
+        Recipe clone = new Recipe(selectedRecipe.getName() + "(Copy)", new ArrayList<>(), new ArrayList<>());
+
+        for(RecipeIngredient oldIngredient :selectedRecipe.getIngredients()){
+
+            RecipeIngredient newIngredient = new RecipeIngredient(
+                    clone,
+                    oldIngredient.getIngredient(),
+                    oldIngredient.getAmount(),
+                    oldIngredient.getUnit());
+            clone.addIngredient(newIngredient);
+        }
+
+        for(Step oldStep : selectedRecipe.getSteps()){
+            Step newStep  = new Step(
+                    clone,
+                    oldStep.getOrder(),
+                    oldStep.getText());
+            clone.addStep(newStep);
+        }
+
+        try{
+            Recipe savedClone = server.addRecipe(clone);
+            refreshRecipes();
+            showRecipe(savedClone);
+        }catch (Exception e){
+            e.printStackTrace();
+
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.setGraphic(null);
+            alert.setHeaderText("Something went wrong!\nCould not clone the recipe!");
+            alert.setContentText("Make sure that the server is running!");
+            alert.showAndWait();
+        }
+    }
 }
 
