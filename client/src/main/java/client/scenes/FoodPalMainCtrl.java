@@ -283,9 +283,12 @@ public class FoodPalMainCtrl {
     }
     @FXML
     public void cloneRecipe(){
-        if(selectedRecipe == null) return;
+        if(selectedRecipe == null){
+            return;
+        }
 
-        Recipe clone = new Recipe(selectedRecipe.getName() + "(Copy)", new ArrayList<>(), new ArrayList<>());
+        String newName = generateUniqueName(selectedRecipe.getName());
+        Recipe clone = new Recipe(newName, new ArrayList<>(), new ArrayList<>());
 
         for(RecipeIngredient oldIngredient :selectedRecipe.getIngredients()){
 
@@ -308,7 +311,7 @@ public class FoodPalMainCtrl {
         try{
             Recipe savedClone = server.addRecipe(clone);
             refreshRecipes();
-            showRecipe(savedClone);
+            colRecipeList.getSelectionModel().select(savedClone);
         }catch (Exception e){
             e.printStackTrace();
 
@@ -318,6 +321,21 @@ public class FoodPalMainCtrl {
             alert.setContentText("Make sure that the server is running!");
             alert.showAndWait();
         }
+    }
+    private String generateUniqueName(String originalName){
+        int counter = 1;
+        String candidateName = originalName + "(" + counter + ")";
+
+        while(isNameTaken(candidateName)){
+            counter ++;
+            candidateName = originalName + "(" + counter + ")";
+        }
+        return candidateName;
+    }
+
+    private boolean isNameTaken(String name){
+        return data.stream()
+                .anyMatch(recipe -> recipe.getName().equals(name));
     }
 }
 
