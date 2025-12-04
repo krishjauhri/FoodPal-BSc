@@ -280,6 +280,5 @@ public class FoodPalMainCtrl {
                 .orElse(recipe);
         showRecipe(updated);
     }
-
 }
 
