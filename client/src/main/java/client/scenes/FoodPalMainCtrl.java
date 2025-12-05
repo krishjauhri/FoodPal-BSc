@@ -10,9 +10,7 @@ import client.utils.ServerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -165,6 +163,60 @@ public class FoodPalMainCtrl {
 
 
     }
+
+    @FXML
+    private void editRecipe() {
+        Recipe selectedRecipe = colRecipeList.getSelectionModel().getSelectedItem();
+        if (selectedRecipe == null) {
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog(selectedRecipe.getName());
+        dialog.setTitle("Edit recipe");
+        dialog.setHeaderText(null);
+        dialog.setContentText("New recipe name:");
+
+        dialog.showAndWait().ifPresent(name -> {
+            if (name.isBlank()) {
+                return;
+            }
+            selectedRecipe.setName(name);
+            server.updateRecipe(selectedRecipe.getId(), selectedRecipe);
+
+            refreshRecipes();
+            Recipe updated = data.stream()
+                    .filter(r -> r.getId() == selectedRecipe.getId())
+                    .findFirst()
+                    .orElse(selectedRecipe);
+            colRecipeList.getSelectionModel().select(updated);
+            showRecipe(updated);
+        });
+    }
+
+    @FXML
+    private void deleteRecipe() {
+        Recipe selectedRecipe = colRecipeList.getSelectionModel().getSelectedItem();
+        if (selectedRecipe == null) {
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete recipe");
+        alert.setHeaderText("Delete recipe \"" + selectedRecipe.getName() + "\"?");
+        alert.setContentText("Are you sure you want to delete this recipe?");
+
+        alert.showAndWait()
+                .filter(response -> response == ButtonType.OK)
+                .ifPresent(response -> {
+                    server.deleteRecipe(selectedRecipe.getId());
+                    data.remove(selectedRecipe);
+                    colRecipeList.getSelectionModel().clearSelection();
+                    recipeTitle.setText("Select one recipe");
+                    ingredientsList.getItems().clear();
+                    stepsBox.getChildren().clear();
+                });
+    }
+
 
     @FXML
     private void addIngredient() {

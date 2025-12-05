@@ -77,6 +77,21 @@ public class ServerUtils {
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
     }
+    public Recipe updateRecipe(long id, Recipe updated) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + id)
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(updated, APPLICATION_JSON), Recipe.class);
+    }
+
+    public void deleteRecipe(long id) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + id)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
 
 	public boolean isServerAvailable() {
 		try {
