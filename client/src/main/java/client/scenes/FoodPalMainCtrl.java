@@ -10,10 +10,13 @@ import client.utils.ServerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
+import javafx.scene.control.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -331,6 +334,62 @@ public class FoodPalMainCtrl {
                 .findFirst()
                 .orElse(recipe);
         showRecipe(updated);
+    }
+    @FXML
+    public void cloneRecipe(){
+        if(selectedRecipe == null){
+            return;
+        }
+
+        String newName = generateUniqueName(selectedRecipe.getName());
+        Recipe clone = new Recipe(newName, new ArrayList<>(), new ArrayList<>());
+
+        for(RecipeIngredient oldIngredient :selectedRecipe.getIngredients()){
+
+            RecipeIngredient newIngredient = new RecipeIngredient(
+                    clone,
+                    oldIngredient.getIngredient(),
+                    oldIngredient.getAmount(),
+                    oldIngredient.getUnit());
+            clone.addIngredient(newIngredient);
+        }
+
+        for(Step oldStep : selectedRecipe.getSteps()){
+            Step newStep  = new Step(
+                    clone,
+                    oldStep.getOrder(),
+                    oldStep.getText());
+            clone.addStep(newStep);
+        }
+
+        try{
+            Recipe savedClone = server.addRecipe(clone);
+            refreshRecipes();
+            colRecipeList.getSelectionModel().select(savedClone);
+        }catch (Exception e){
+            e.printStackTrace();
+
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.setGraphic(null);
+            alert.setHeaderText("Something went wrong!\nCould not clone the recipe!");
+            alert.setContentText("Make sure that the server is running!");
+            alert.showAndWait();
+        }
+    }
+    private String generateUniqueName(String originalName){
+        int counter = 1;
+        String candidateName = originalName + "(" + counter + ")";
+
+        while(isNameTaken(candidateName)){
+            counter ++;
+            candidateName = originalName + "(" + counter + ")";
+        }
+        return candidateName;
+    }
+
+    private boolean isNameTaken(String name){
+        return data.stream()
+                .anyMatch(recipe -> recipe.getName().equals(name));
     }
 }
 

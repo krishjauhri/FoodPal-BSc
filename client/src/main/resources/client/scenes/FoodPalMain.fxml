@@ -55,23 +55,24 @@
 
                    <children>
                        <!--recipe tile-->
-                       <HBox spacing ="10">
+                       <HBox spacing="10">
                            <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
-                           <Button text="Download" onAction="#downloadRecipe" />
+                           <Button onAction="#downloadRecipe" text="Download" />
+                     <Button mnemonicParsing="false" onAction="#cloneRecipe" text="Clone" />
                        </HBox>
 
                        <!-- divider line -->
                        <Separator maxWidth="Infinity" />
 
                        <!--ingredients part-->
-                       <VBox spacing="5" VBox.vgrow="ALWAYS">
+                       <VBox prefHeight="116.0" prefWidth="244.0" spacing="5" VBox.vgrow="ALWAYS">
                            <Label style="-fx-font-size: 14;" text="Ingredients:" />
                      <ListView fx:id="ingredientsList" prefHeight="200.0" prefWidth="200.0" />
                      <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add Ingredient" />
                      <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit Ingredient" />
                      <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete Ingredient" />
 
-                           <VBox fx:id="ingredientsBox" spacing="5" />
+                           <VBox fx:id="ingredientsBox" prefWidth="267.0" spacing="5" />
                        </VBox>
 
                        <!--preparation part-->

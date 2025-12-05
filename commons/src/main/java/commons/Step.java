@@ -1,5 +1,6 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -16,6 +17,7 @@ public class Step {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "recipe_id")
+    @JsonBackReference
     private Recipe recipe;
 
     public Step(){
@@ -57,11 +59,11 @@ public class Step {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Step step = (Step) o;
-        return id == step.id && stepOrder == step.stepOrder && Objects.equals(text, step.text) && Objects.equals(recipe, step.recipe);
+        return id == step.id && stepOrder == step.stepOrder && Objects.equals(text, step.text);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, stepOrder, text, recipe);
+        return Objects.hash(id, stepOrder, text);
     }
 }
