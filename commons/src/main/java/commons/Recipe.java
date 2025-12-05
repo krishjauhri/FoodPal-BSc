@@ -19,7 +19,8 @@ public class Recipe {
     @JsonManagedReference
     private List<RecipeIngredient> ingredients = new ArrayList<>();
 
-    @OneToMany()
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Step> steps = new ArrayList<>();
 
     public Recipe() {
