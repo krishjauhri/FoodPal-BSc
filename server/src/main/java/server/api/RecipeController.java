@@ -58,9 +58,31 @@ public class RecipeController {
         return ResponseEntity.ok(updated);
     }
 
+
+
     @PostMapping("/ingredients")
     public Ingredient createIngredient(@RequestBody Ingredient ingredient) {
         return ingredientRepository.save(ingredient);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable long id,
+                                               @RequestBody Recipe updated) {
+        return repo.findById(id)
+                .map(existing -> {
+                    existing.setName(updated.getName());
+                    return ResponseEntity.ok(repo.save(existing));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        repo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{recipeId}/ingredients/{riId}")
