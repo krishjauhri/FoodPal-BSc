@@ -3,10 +3,12 @@ package server.api;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
+import commons.Step;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
+import server.database.StepRepository;
 import server.service.RecipeService;
 
 import java.util.List;
@@ -18,11 +20,14 @@ public class RecipeController {
     private final RecipeRepository repo;
     private final RecipeService recipeService;
     private final IngredientRepository ingredientRepository;
+    private final StepRepository stepRepository;
 
-    public RecipeController(RecipeRepository repo, RecipeService recipeService, IngredientRepository ingredientRepository) {
+    public RecipeController(RecipeRepository repo, RecipeService recipeService,
+                            IngredientRepository ingredientRepository, StepRepository stepRepository) {
         this.repo = repo;
         this.recipeService = recipeService;
         this.ingredientRepository = ingredientRepository;
+        this.stepRepository = stepRepository;
     }
 
     @PostMapping
@@ -44,6 +49,15 @@ public class RecipeController {
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping("/{recipeId}/steps")
+    public ResponseEntity<Recipe> addStepToRecipe(
+            @PathVariable Long recipeId,
+            @RequestBody Step step) {
+
+        Recipe updated = recipeService.addStep(recipeId, step);
+        return ResponseEntity.ok(updated);
+    }
+
     @PostMapping("/ingredients")
     public Ingredient createIngredient(@RequestBody Ingredient ingredient) {
         return ingredientRepository.save(ingredient);
@@ -60,6 +74,17 @@ public class RecipeController {
     }
     public record UpdateIngredientRequest(double amount, String unit){}
 
+    @PutMapping("/{recipeId}/steps/{stepId}")
+    public ResponseEntity<Recipe> updateStep(
+            @PathVariable Long recipeId,
+            @PathVariable Long stepId,
+            @RequestBody UpdateStepRequest req) {
+
+        Recipe updated = recipeService.updateStep(recipeId, stepId, req.order, req.text);
+        return ResponseEntity.ok(updated);
+    }
+    public record UpdateStepRequest(int order, String text) {}
+
     @DeleteMapping("/{recipeId}/ingredients/{riId}")
     public ResponseEntity<Recipe> deleteIngredient(
             @PathVariable Long recipeId,
@@ -72,4 +97,18 @@ public class RecipeController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @DeleteMapping("/{recipeId}/steps/{stepId}")
+    public ResponseEntity<Recipe> deleteStep(
+            @PathVariable Long recipeId,
+            @PathVariable Long stepId) {
+
+        try {
+            Recipe updated = recipeService.deleteStep(recipeId, stepId);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
