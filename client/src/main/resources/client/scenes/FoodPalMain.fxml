@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -54,9 +55,9 @@
 
                    <children>
                        <!--recipe tile-->
-                       <HBox spacing ="10">
+                       <HBox spacing="10">
                            <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
-                           <Button text="Download" onAction="#downloadRecipe" />
+                           <Button onAction="#downloadRecipe" text="Download" />
                        </HBox>
 
                        <!-- divider line -->
@@ -71,14 +72,18 @@
                      <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete Ingredient" />
 
                            <VBox fx:id="ingredientsBox" spacing="5" />
+                     <HBox prefHeight="100.0" prefWidth="200.0" />
                        </VBox>
 
                        <!--preparation part-->
                        <VBox spacing="5" VBox.vgrow="ALWAYS">
+                     <Button mnemonicParsing="false" onAction="#addStep" text="+ Add Step" />
                            <Label style="-fx-font-size: 14;" text="Preparation:" />
-                           <VBox fx:id="stepsBox" spacing="5">
-                               <Label text="none" />
-                           </VBox>
+                     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                        <content>
+                           <VBox fx:id="stepsBox" prefHeight="200.0" prefWidth="100.0" spacing="7.0" />
+                        </content>
+                     </ScrollPane>
                        </VBox>
 
                    </children>
