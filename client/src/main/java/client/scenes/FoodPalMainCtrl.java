@@ -16,7 +16,11 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.control.Button;
+import java.util.Comparator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -94,7 +98,60 @@ public class FoodPalMainCtrl {
             }
         });
     }
+    @FXML
+    private void addStep(){
+        if(selectedRecipe == null){
+            return;
+        }
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add step");
+        dialog.setHeaderText("Add a new step");
+        dialog.setContentText("Description:");
 
+        dialog.showAndWait().ifPresent(text -> {
+            if (!text.isBlank()) {
+                int nextOrder = selectedRecipe.getSteps().size() + 1;
+                server.addStep(selectedRecipe.getId(), nextOrder, text);
+                refreshAndReloadSelected();
+            }
+        });
+    }
+
+    private void  editStep(Step step){
+        TextInputDialog dialog = new TextInputDialog(step.getText());
+        dialog.setTitle("Edit step");
+        dialog.setHeaderText("Edit a step " + step.getOrder());
+        dialog.setContentText("Description:");
+
+        dialog.showAndWait().ifPresent(newText -> {
+            if (!newText.isBlank() && !newText.equals(step.getText())) {
+                server.updateStep(selectedRecipe.getId(), step.getId(), step.getOrder(), newText);
+                refreshAndReloadSelected();
+            }
+        });
+    }
+
+    private void deleteStep(Step step){
+        server.deleteStep(selectedRecipe.getId(), step.getId());
+        refreshAndReloadSelected();
+    }
+
+    private void refreshAndReloadSelected(){
+        long currentId = selectedRecipe.getId();
+        refreshRecipes();
+
+        Recipe updated = data.stream()
+                .filter(r -> r.getId() == currentId)
+                .findFirst()
+                .orElse(null);
+        if(updated != null){
+            showRecipe(updated);
+        }else{
+            stepsBox.getChildren().clear();
+            ingredientsList.getItems().clear();
+            recipeTitle.setText("");
+        }
+    }
     public void showRecipe(Recipe recipe) {
         this.selectedRecipe = recipe;
         // title
@@ -106,12 +163,27 @@ public class FoodPalMainCtrl {
         if (recipe.getSteps().isEmpty()) {
             stepsBox.getChildren().add(new Label("No steps found"));
         } else {
+            //sort steps by order
+            recipe.getSteps().sort(Comparator.comparingInt(Step::getOrder));
+
             for (Step step : recipe.getSteps()) {
-                stepsBox.getChildren().add(new Label(step.getText()));
+                HBox row = new HBox(10);
+                Label stepLabel = new Label(step.getOrder() + ". " +  step.getText());
+                stepLabel.setWrapText(true);
+
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                Button editBtn = new Button("Edit");
+                editBtn.setOnAction(event -> editStep(step));
+
+                Button deleteBtn = new Button("X");
+                deleteBtn.setStyle("-fx-text-fill : red; -fx-font-weight: bold;");
+                deleteBtn.setOnAction(event -> deleteStep(step));
+
+                row.getChildren().addAll(stepLabel, spacer, editBtn, deleteBtn);
+                stepsBox.getChildren().add(row);
             }
         }
-
-
     }
 
     private void showIngredients(Recipe recipe) {
