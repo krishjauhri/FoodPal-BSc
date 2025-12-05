@@ -13,82 +13,68 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.FoodPalMainCtrl">
-   <top>
-      <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0" style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="FoodPal" textAlignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font></Label>
-            <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
-         </children>
-      </HBox>
-       <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0" style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
-           <children>
-               <Label text="FoodPal" textAlignment="CENTER">
-                   <font>
-                       <Font name="System Bold" size="20.0" />
-                   </font>
-               </Label>
-               <Button onAction="#refreshRecipes" text="Refresh" />
-               <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
-           </children>
-       </HBox>
+    <top>
+        <HBox alignment="CENTER" prefHeight="80.0" prefWidth="603.0" spacing="50.0" style="-fx-background-color: lightgrey;" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="FoodPal" textAlignment="CENTER">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+                <Button onAction="#refreshRecipes" text="Refresh" />
+                <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" />
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.5">
+            <items>
+                <VBox prefHeight="282.0" prefWidth="296.0">
+                    <children>
+                        <ListView fx:id="colRecipeList" prefHeight="200.0" prefWidth="200.0" />
+                    </children>
+                </VBox>
 
-   </top>
-   <center>
+                <VBox fx:id="detailPane" spacing="10">
+                    <padding>
+                        <Insets bottom="20" left="20" right="20" top="10" />
+                    </padding>
 
-       <SplitPane dividerPositions="0.5">
-           <items>
-               <!--left side: recipe list -->
-               <VBox prefHeight="282.0" prefWidth="296.0">
-                   <children>
-                       <ListView fx:id="colRecipeList" prefHeight="200.0" prefWidth="200.0" />
-                   </children>
-               </VBox>
+                    <children>
+                        <HBox spacing="10">
+                            <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
+                            <Button onAction="#downloadRecipe" text="Download" />
+                            <Button mnemonicParsing="false" onAction="#cloneRecipe" text="Clone" />
+                        </HBox>
 
-               <!--right side: recipe details -->
-               <VBox fx:id="detailPane" spacing="10">
-                   <padding>
-                       <Insets bottom="20" left="20" right="20" top="10" />
-                   </padding>
+                        <Separator maxWidth="Infinity" />
 
-                   <children>
-                       <!--recipe tile-->
-                       <HBox spacing="10">
-                           <Label fx:id="recipeTitle" style="-fx-font-size:14;" text="Select one recipe" />
-                           <Button onAction="#downloadRecipe" text="Download" />
-                       </HBox>
+                        <VBox prefHeight="116.0" prefWidth="244.0" spacing="5" VBox.vgrow="ALWAYS">
+                            <Label style="-fx-font-size: 14;" text="Ingredients:" />
+                            <ListView fx:id="ingredientsList" prefHeight="200.0" prefWidth="200.0" />
+                            <HBox spacing="5">
+                                <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add Ingredient" />
+                                <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit Ingredient" />
+                                <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete Ingredient" />
+                            </HBox>
+                            <VBox fx:id="ingredientsBox" prefWidth="267.0" spacing="5" />
+                        </VBox>
 
-                       <!-- divider line -->
-                       <Separator maxWidth="Infinity" />
+                        <VBox spacing="5" VBox.vgrow="ALWAYS">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label style="-fx-font-size: 14;" text="Preparation:" />
+                                <Button mnemonicParsing="false" onAction="#addStep" text="+ Add Step" />
+                            </HBox>
+                            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                                <content>
+                                    <VBox fx:id="stepsBox" prefWidth="100.0" spacing="7.0" />
+                                </content>
+                            </ScrollPane>
+                        </VBox>
 
-                       <!--ingredients part-->
-                       <VBox spacing="5" VBox.vgrow="ALWAYS">
-                           <Label style="-fx-font-size: 14;" text="Ingredients:" />
-                     <ListView fx:id="ingredientsList" prefHeight="200.0" prefWidth="200.0" />
-                     <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add Ingredient" />
-                     <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit Ingredient" />
-                     <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete Ingredient" />
-
-                           <VBox fx:id="ingredientsBox" spacing="5" />
-                     <HBox prefHeight="100.0" prefWidth="200.0" />
-                       </VBox>
-
-                       <!--preparation part-->
-                       <VBox spacing="5" VBox.vgrow="ALWAYS">
-                     <Button mnemonicParsing="false" onAction="#addStep" text="+ Add Step" />
-                           <Label style="-fx-font-size: 14;" text="Preparation:" />
-                     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                        <content>
-                           <VBox fx:id="stepsBox" prefHeight="200.0" prefWidth="100.0" spacing="7.0" />
-                        </content>
-                     </ScrollPane>
-                       </VBox>
-
-                   </children>
-               </VBox>
-           </items>
-       </SplitPane>
-   </center>
+                    </children>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
 </BorderPane>
