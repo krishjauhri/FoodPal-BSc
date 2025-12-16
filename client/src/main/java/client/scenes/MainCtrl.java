@@ -1,18 +1,3 @@
-/*
- * Copyright 2021 Delft University of Technology
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package client.scenes;
 
 import javafx.scene.Parent;
@@ -30,14 +15,25 @@ public class MainCtrl {
     private AddQuoteCtrl addCtrl;
     private Scene add;
 
+    private void applyStyles(Scene scene) {
+        var css = getClass().getResource("/styles/foodpal.css");
+        if (css == null) {
+            System.err.println("Could not load /styles/foodpal.css (check resources path)");
+            return;
+        }
+        scene.getStylesheets().add(css.toExternalForm());
+    }
+
     public void initialize(Stage primaryStage, Pair<FoodPalMainCtrl, Parent> overview,
                            Pair<AddQuoteCtrl, Parent> add) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
+        applyStyles(this.overview);
 
         this.addCtrl = add.getKey();
         this.add = new Scene(add.getValue());
+        applyStyles(this.add);
 
         showOverview();
         primaryStage.show();
