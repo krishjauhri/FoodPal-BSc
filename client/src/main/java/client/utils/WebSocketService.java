@@ -60,4 +60,12 @@ public class WebSocketService {
             }
         });
     }
+
+    /**
+     * For testing purposes only.
+     * Allows injecting a mock session to test subscription logic without a real server.
+     */
+    public void setSession(StompSession session) {
+        this.session = session;
+    }
 }
