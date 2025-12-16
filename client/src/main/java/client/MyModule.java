@@ -19,6 +19,7 @@ import client.scenes.*;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
+import client.utils.WebSocketService;
 
 import client.utils.ServerUtils;
 
@@ -31,6 +32,7 @@ public class MyModule implements Module {
         binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
         binder.bind(RecipeOverviewCtrl.class).in(Scopes.SINGLETON);
         binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
+        binder.bind(WebSocketService.class).in(Scopes.SINGLETON);
         binder.bind(FoodPalMainCtrl.class).in(Scopes.SINGLETON);
     }
 }

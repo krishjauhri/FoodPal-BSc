@@ -85,7 +85,41 @@
 			<version>${version.mockito}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+
+        <!-- Spring Messaging: Handles the STOMP protocol logic -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>6.1.1</version>
+        </dependency>
+
+        <!-- Spring WebSocket: Provides the client-side WebSocket classes -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>6.1.1</version>
+        </dependency>
+
+        <!-- Jackson Databind: Converts JSON text from server into Java Objects -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
+        <!-- Tyrus: The actual "engine" that performs the network connection (JSR 356) -->
+        <dependency>
+            <groupId>org.glassfish.tyrus.bundles</groupId>
+            <artifactId>tyrus-standalone-client</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>6.2.12</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
