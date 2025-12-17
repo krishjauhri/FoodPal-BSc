@@ -4,12 +4,14 @@ import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Step;
+import commons.RecipeEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 import server.database.StepRepository;
 import server.service.RecipeService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -21,18 +23,22 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final IngredientRepository ingredientRepository;
     private final StepRepository stepRepository;
+    private final SimpMessagingTemplate message;
 
     public RecipeController(RecipeRepository repo, RecipeService recipeService,
-                            IngredientRepository ingredientRepository, StepRepository stepRepository) {
+                            IngredientRepository ingredientRepository, StepRepository stepRepository, SimpMessagingTemplate message) {
         this.repo = repo;
         this.recipeService = recipeService;
         this.ingredientRepository = ingredientRepository;
         this.stepRepository = stepRepository;
+        this.message = message;
     }
 
     @PostMapping
     public Recipe add(@RequestBody Recipe recipe) {
-        return repo.save(recipe);
+        Recipe savedRecipe = repo.save(recipe);
+        message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.ADD, savedRecipe.getId(), savedRecipe.getName()));
+        return savedRecipe;
     }
 
     @GetMapping
@@ -71,7 +77,9 @@ public class RecipeController {
         return repo.findById(id)
                 .map(existing -> {
                     existing.setName(updated.getName());
-                    return ResponseEntity.ok(repo.save(existing));
+                    Recipe savedRecipe = repo.save(updated);
+                    message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE, savedRecipe.getId(), savedRecipe.getName()));
+                    return ResponseEntity.ok(savedRecipe);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -82,6 +90,8 @@ public class RecipeController {
             return ResponseEntity.notFound().build();
         }
         repo.deleteById(id);
+
+        message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.DELETE, id, null));
         return ResponseEntity.noContent().build();
     }
 
