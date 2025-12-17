@@ -75,7 +75,7 @@ public class WebSocketService {
      * @param type to convert JSON to this class
      * @param callback for parsed events
      *
-     * @return subsciption
+     * @return subscription
      *
     */
     public <T> StompSession.Subscription subscribe(String topic, Class<T> type, Consumer<T> callback) {

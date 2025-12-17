@@ -77,7 +77,7 @@ public class RecipeController {
         return repo.findById(id)
                 .map(existing -> {
                     existing.setName(updated.getName());
-                    Recipe savedRecipe = repo.save(updated);
+                    Recipe savedRecipe = repo.save(existing);
                     message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE, savedRecipe.getId(), savedRecipe.getName()));
                     return ResponseEntity.ok(savedRecipe);
                 })
