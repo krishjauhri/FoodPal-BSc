@@ -32,6 +32,7 @@ public class Recipe {
         this.steps = steps;
     }
 
+
     public long getId() {
         return id;
     }
@@ -43,6 +44,8 @@ public class Recipe {
     public String getName() {
         return name;
     }
+
+
 
     public void setName(String name) {
         this.name = name;

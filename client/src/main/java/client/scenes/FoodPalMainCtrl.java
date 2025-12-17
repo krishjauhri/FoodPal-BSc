@@ -10,16 +10,16 @@ import client.utils.ServerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
+
+import java.util.Optional;
+
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.control.Button;
+
 import java.util.Comparator;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -195,6 +195,83 @@ public class FoodPalMainCtrl {
                         .toList()
         );
     }
+
+    @FXML
+    private void editRecipeName() {
+        if(selectedRecipe == null){
+            return;
+        }
+        TextInputDialog dialog = new TextInputDialog(selectedRecipe.getName());
+        dialog.setTitle("Edit recipe name");
+        dialog.setHeaderText("Rename recpipe");
+        dialog.setContentText("New name:");
+
+        dialog.showAndWait().ifPresent(newName -> {
+            String trimmed = newName == null ? "" :  newName.trim();
+            if(trimmed.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle(null);
+                alert.setHeaderText("Invalid recipe name");
+                alert.setContentText("Recipe name cannot be empty");
+                alert.showAndWait();
+                return;
+            }
+
+            Recipe updated = new Recipe();
+            updated.setName(trimmed);
+
+            try {
+                server.updateRecipe(selectedRecipe.getId(), updated);
+                refreshAndReloadSelected();
+            }
+            catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setGraphic(null);
+                alert.setHeaderText("Could not update recipe name");
+                alert.setContentText("Make sure the server is running");
+                alert.showAndWait();
+            }
+        });
+    }
+
+
+    @FXML
+    private void deleteSelectedRecipe() {
+        if(selectedRecipe == null){
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setGraphic(null);
+        confirm.setTitle("Delete recipe");
+        confirm.setHeaderText("Are you sure you want to delete this recipe?");
+        confirm.setContentText(selectedRecipe.getName());
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            server.deleteRecipe(selectedRecipe.getId());
+            selectedRecipe = null;
+            colRecipeList.getSelectionModel().clearSelection();
+            refreshRecipes();
+            recipeTitle.setText("Select a recipe");
+            ingredientsList.getItems().clear();
+            stepsBox.getChildren().clear();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setGraphic(null);
+            alert.setHeaderText("Could not delete recipe");
+            alert.setContentText("Make sure the server is running");
+            alert.showAndWait();
+        }
+    }
+
+
+
 
     @FXML
     public void downloadRecipe() {
