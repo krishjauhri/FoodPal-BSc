@@ -52,12 +52,8 @@ public class Main extends Application {
 			return;
 		}
 
-        // CONNECT MANUALLY HERE
-        try {
-            webSocket.connect("ws://localhost:8080/websocket");
-        } catch (Exception e) {
-            System.err.println("Could not connect to WebSocket: " + e.getMessage());
-        }
+        //Parallel websocket connect
+        webSocket.connectAsync("ws://localhost:8080/websocket");
 
         var overview = FXML.load(FoodPalMainCtrl.class, "client", "scenes", "FoodPalMain.fxml");
 
