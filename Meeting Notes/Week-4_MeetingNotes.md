@@ -68,7 +68,7 @@ Reminders:
 
 Next meeting's chair and minute taker
 Chair: Andrei
-Minute-taker:
+Minute-taker: Julia
 
 6. Feedback round (5 min)
 
