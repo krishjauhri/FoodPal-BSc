@@ -1,6 +1,6 @@
 package client.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,7 +24,7 @@ public class WebSocketServiceTest {
 
     @Test
     public void subscribeWithoutConnectionReturnsNull() {
-        // Since no server is running, the session in sut is null or not connected
+        // We haven't called connect(), so session is null
         var sub = sut.subscribe("/topic/test", String.class, str -> {});
         assertNull(sub, "Should return null if not connected");
     }
@@ -35,14 +35,27 @@ public class WebSocketServiceTest {
         StompSession mockSession = mock(StompSession.class);
         when(mockSession.isConnected()).thenReturn(true);
 
-        // 2. Inject the mock into our service
+        // 2. Inject the mock session manually (Requires setSession method in WebSocketService)
         sut.setSession(mockSession);
 
         // 3. Call subscribe
         Consumer<String> callback = str -> {};
         sut.subscribe("/topic/test", String.class, callback);
 
-        // 4. Verify the service actually called 'subscribe' on the session
+        // 4. Verify the service actually passed the subscription to the session
         verify(mockSession).subscribe(eq("/topic/test"), any());
+    }
+
+    @Test
+    public void disconnectClosesSession() {
+        // 1. Mock the StompSession
+        StompSession mockSession = mock(StompSession.class);
+        when(mockSession.isConnected()).thenReturn(true);
+
+        sut.setSession(mockSession);
+
+        sut.disconnect();
+
+        verify(mockSession).disconnect();
     }
 }

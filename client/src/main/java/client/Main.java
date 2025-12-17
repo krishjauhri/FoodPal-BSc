@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import client.scenes.FoodPalMainCtrl;
+import client.utils.WebSocketService;
 import com.google.inject.Injector;
 
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -42,11 +44,20 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws Exception {
 
 		var serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        var webSocket = INJECTOR.getInstance(WebSocketService.class);
+
 		if (!serverUtils.isServerAvailable()) {
 			var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
 			System.err.println(msg);
 			return;
 		}
+
+        // CONNECT MANUALLY HERE
+        try {
+            webSocket.connect("ws://localhost:8080/websocket");
+        } catch (Exception e) {
+            System.err.println("Could not connect to WebSocket: " + e.getMessage());
+        }
 
         var overview = FXML.load(FoodPalMainCtrl.class, "client", "scenes", "FoodPalMain.fxml");
 
@@ -54,5 +65,12 @@ public class Main extends Application {
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.initialize(primaryStage, overview, add);
+
+        // DISCONNECT ON CLOSE
+        primaryStage.setOnCloseRequest(e -> {
+            webSocket.disconnect();
+            Platform.exit();
+            System.exit(0);
+        });
 	}
 }

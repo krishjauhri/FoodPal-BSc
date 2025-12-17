@@ -3,15 +3,6 @@ package server.api;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//imports for testing subscribe (not required for connect)
-//import java.lang.reflect.Type;
-//import java.util.concurrent.CompletableFuture;
-//import java.util.concurrent.ExecutionException;
-//import java.util.concurrent.TimeoutException;
-
-//import org.springframework.messaging.simp.stomp.StompFrameHandler;
-//import org.springframework.messaging.simp.stomp.StompHeaders;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,9 +24,12 @@ public class WebSocketTest {
     @BeforeEach
     public void setup() {
         stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+        //message converter is for subscribes for JSON
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
     }
 
+    //Test only works when main server isn't running
+    //As main server locks h2 db
     @Test
     public void verifyConnection() throws Exception {
         String url = "ws://localhost:" + port + "/websocket";
