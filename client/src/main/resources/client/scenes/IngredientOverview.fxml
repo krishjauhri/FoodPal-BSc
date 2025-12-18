@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane
+        xmlns="http://javafx.com/javafx/25"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="client.scenes.IngredientOverviewCtrl">
+
+    <center>
+        <SplitPane dividerPositions="0.35">
+            <items>
+                <ListView fx:id="ingredientList"/>
+                <VBox spacing="12">
+                    <Label fx:id="ingredientName"/>
+                    <Button text="Edit nutrition" onAction="#editIngredient"/>
+
+                    <Label fx:id="proteinLabel" text="Protein:"/>
+                    <Label fx:id="fatLabel" text="Fat:"/>
+                    <Label fx:id="carbsLabel" text="Carbs:"/>
+                </VBox>
+
+            </items>
+        </SplitPane>
+    </center>
+
+</BorderPane>
