@@ -1,35 +1,39 @@
 package client.scenes;
 
+import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Step;
-
 import com.google.inject.Inject;
 import client.utils.ServerUtils;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-
-import java.util.Optional;
-
-import javafx.scene.layout.VBox;
+import java.util.*;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-
-import java.util.Comparator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class FoodPalMainCtrl {
 
+
     private final ServerUtils server;
+
+    private Parent ingredientView;
+    private boolean ingredientLoaded = false;
+    private IngredientOverviewCtrl ingredientCtrl;
+
+    private Node recipeView;
+
+    @FXML
+    private BorderPane contentPane;
 
     @FXML
     private ListView<Recipe> colRecipeList;
@@ -59,6 +63,44 @@ public class FoodPalMainCtrl {
     }
 
     @FXML
+    public void backRecipes() {
+        contentPane.setCenter(recipeView);
+    }
+
+    public List<Ingredient> extractIngredients(List<Recipe> recipes) {
+        return recipes.stream()
+                .flatMap(r -> r.getIngredients().stream())
+                .map(RecipeIngredient::getIngredient)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+    }
+
+    @FXML
+    public void showIngredientsList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/client/scenes/IngredientOverview.fxml")
+            );
+            Parent view = loader.load();
+
+            IngredientOverviewCtrl ctrl = loader.getController();
+
+            List<Ingredient> ingredients =
+                    extractIngredients(server.getRecipes());
+
+            ctrl.setIngredients(ingredients);
+
+            contentPane.setCenter(view);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    @FXML
     public void initialize() {
         // initialize list
         data = FXCollections.observableArrayList();
@@ -73,6 +115,7 @@ public class FoodPalMainCtrl {
                         showRecipe(newRecipe);
                     }
                 });
+        recipeView = contentPane.getCenter();
     }
 
     @FXML

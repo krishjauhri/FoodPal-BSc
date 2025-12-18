@@ -84,4 +84,9 @@ public class Ingredient {
     public int hashCode() {
         return Objects.hash( name, protein, fat, carbs);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
