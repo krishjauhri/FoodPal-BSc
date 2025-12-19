@@ -33,16 +33,18 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
-    public Recipe updateIngredient(Long recipeId, Long recipeIngredientId, double amount, String unit){
-        Recipe recipe = recipeRepository.findById(recipeId)
+    public Recipe updateIngredient(Long recipeId, long riId, double amount, String unit) {
+        Recipe recipe =  recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RuntimeException("Recipe not found"));
-        RecipeIngredient ri = ingredientRepository.findById(recipeIngredientId)
-                .orElseThrow(() -> new RuntimeException("RecipeIngredient not found"));
 
+        RecipeIngredient ri = recipe.getIngredients().stream()
+                .filter(x -> x.getId() == riId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Recipe not found"));
         ri.setAmount(amount);
         ri.setUnit(unit);
-        ingredientRepository.save(ri);
-        return recipe;
+
+        return recipeRepository.save(recipe);
     }
 
     public Recipe deleteIngredient(Long recipeId, Long recipeIngredientId){

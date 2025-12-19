@@ -50,9 +50,13 @@ public class RecipeController {
     public ResponseEntity<Recipe> addIngredientToRecipe(
             @PathVariable Long recipeId,
             @RequestBody RecipeIngredient ingredient) {
-
-        Recipe updated = recipeService.addIngredient(recipeId, ingredient);
-        return ResponseEntity.ok(updated);
+        try {
+            Recipe updated = recipeService.addIngredient(recipeId, ingredient);
+            return ResponseEntity.ok(updated);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/{recipeId}/steps")
@@ -100,9 +104,13 @@ public class RecipeController {
             @PathVariable Long recipeId,
             @PathVariable Long riId,
             @RequestBody UpdateIngredientRequest req){
-
-        Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount, req.unit);
-        return ResponseEntity.ok(updated);
+        try {
+            Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount, req.unit);
+            return ResponseEntity.ok(updated);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     public record UpdateIngredientRequest(double amount, String unit){}
 

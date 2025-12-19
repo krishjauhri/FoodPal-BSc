@@ -20,6 +20,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class FoodPalMainCtrl {
 
@@ -364,33 +368,71 @@ public class FoodPalMainCtrl {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) return; // no recipe selected
 
+        String name;
         TextInputDialog nameDialog = new TextInputDialog();
         nameDialog.setTitle("Add Ingredient");
         nameDialog.setHeaderText("Enter ingredient name:");
         nameDialog.setContentText("Name:");
-        var nameResult = nameDialog.showAndWait();
-        if (nameResult.isEmpty()) return;
-        String name = nameResult.get();
 
+        while (true) {
+            var nameResult = nameDialog.showAndWait();
+            if (nameResult.isEmpty()) return;
+            name = nameDialog.getEditor().getText();
+            if(name != null) name = name.trim();
+            if(name != null && name.matches(".*[A-Za-z].*")) {
+                break;
+            }
+            showError("Illegal value", "Ingredient must contain at least one letter. Try again.");
+            nameDialog.getEditor().selectAll();
+        }
+
+        double amount;
+        while (true) {
         TextInputDialog amountDialog = new TextInputDialog();
         amountDialog.setTitle("Amount");
         amountDialog.setHeaderText("Enter amount:");
         amountDialog.setContentText("Amount (Example: 200):");
         var amountResult = amountDialog.showAndWait();
         if (amountResult.isEmpty()) return;
-        double amount = Double.parseDouble(amountResult.get());
+        String raw =  amountResult.get().trim().replace(',', '.');
+        try {
+            amount = Double.parseDouble(raw);
+            if(!Double.isFinite(amount) || amount <= 0) {
+                showError("Invalid amount", "Amount must be a valid number.");
+                continue;
+            }
+            break;
+            }
+        catch (NumberFormatException e) {
+            showError("Invalid amount", "Amount must be a valid number.");
+        }
+        }
 
+        String unit;
         TextInputDialog unitDialog = new TextInputDialog();
         unitDialog.setTitle("Unit");
         unitDialog.setHeaderText("Enter unit:");
         unitDialog.setContentText("Unit (g, ml, pcs, ...):");
-        var unitResult = unitDialog.showAndWait();
-        if (unitResult.isEmpty()) return;
-        String unit = unitResult.get();
+
+        while (true) {
+            var unitResult = unitDialog.showAndWait();
+            if (unitResult.isEmpty()) return;
+
+            unit = unitDialog.getEditor().getText().trim();
+            if (isValidUnit(unit)) break;
+            showError("Invalid unit", "Invalid unit, try again");
+            unitDialog.getEditor().selectAll();
+        }
 
         // Send to backend
-        var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
-        server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+        try {
+            var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
+            server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+        }
+        catch (Exception e) {
+            showError("Server error", "Server rejected the value, try again");
+            return;
+        }
 
         refreshRecipes();// reload UI
         Recipe updated = data.stream()
@@ -414,7 +456,13 @@ public class FoodPalMainCtrl {
         String newUnit = askForNewUnit(selected);
         if (newUnit == null) return;
 
-        updateIngredientOnServer(recipe, selected, newAmount, newUnit);
+        try {
+            updateIngredientOnServer(recipe, selected, newAmount, newUnit);
+        }
+        catch (Exception e) {
+            showError("Server error", "Server rejected the value, try again");
+            return;
+        }
 
         refreshRecipes();// reload UI
         Recipe updated = data.stream()
@@ -425,6 +473,7 @@ public class FoodPalMainCtrl {
         showRecipe(updated);
     }
     private Double askForNewAmount(RecipeIngredient ri) {
+        while(true) {
         TextInputDialog dialog = new TextInputDialog(String.valueOf(ri.getAmount()));
         dialog.setTitle("Edit Ingredient");
         dialog.setHeaderText("Edit amount for " + ri.getIngredient().getName());
@@ -432,23 +481,37 @@ public class FoodPalMainCtrl {
 
         var result = dialog.showAndWait();
         if (result.isEmpty()) return null;
-
+        String raw = result.get().trim().replace(',', '.');
         try {
-            return Double.parseDouble(result.get());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid amount");
-            return null;
+            double v =  Double.parseDouble(raw);
+            if(!Double.isFinite(v) || v <= 0) {
+                showError("Invalid amount", "Amount must be a valid number, try again.");
+                continue;
+            }
+            return v;
+        }
+        catch (NumberFormatException e) {
+            showError("Invalid amount", "Amount must be a valid number, try again.");
+        }
         }
     }
 
     private String askForNewUnit(RecipeIngredient ri) {
-        TextInputDialog dialog = new TextInputDialog(ri.getUnit());
-        dialog.setTitle("Edit Ingredient");
-        dialog.setHeaderText("Edit unit for " + ri.getIngredient().getName());
-        dialog.setContentText("Unit:");
+        while (true) {
+            TextInputDialog dialog = new TextInputDialog(ri.getUnit());
+            dialog.setTitle("Edit Ingredient");
+            dialog.setHeaderText("Edit unit for " + ri.getIngredient().getName());
+            dialog.setContentText("Unit:");
 
-        var result = dialog.showAndWait();
-        return result.orElse(null);
+            var result = dialog.showAndWait();
+            if (result.isEmpty()) return null;
+            String u = result.get().trim();
+            if (u.isEmpty()) {
+                showError("Invalid unit", "Unit cannot be empty, try again");
+                continue;
+            }
+            return u;
+        }
     }
 
     private void updateIngredientOnServer(
@@ -529,5 +592,79 @@ public class FoodPalMainCtrl {
         return data.stream()
                 .anyMatch(recipe -> recipe.getName().equals(name));
     }
+
+    private void showError(String title, String message){
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(message);
+        a.showAndWait();
+    }
+
+
+    private <T> T askUntilValid(String title, String header, String content, String initialValue, Function<String, T> parser) {
+        String current = initialValue == null ? "" : initialValue;
+
+        while(true) {
+            TextInputDialog d = new TextInputDialog(current);
+            d.setTitle(title);
+            d.setHeaderText(header);
+            d.setContentText(content);
+            Optional<String> res = d.showAndWait();
+            if (res.isPresent()) return null;
+
+            String raw =  res.get().trim();
+            try {
+                T parsed = parser.apply(raw);
+                current = raw;
+                return parsed;
+            } catch(IllegalArgumentException ex){
+                showError(title, ex.getMessage() == null ? "Illegal value. Try again!" : ex.getMessage());
+            } catch(Exception ex){
+                showError(title, "Illegal value. Try again!");
+            }
+        }
+    }
+
+    private double askPositiveAmount(String initial) {
+        Double v = askUntilValid(
+                "Amount",
+                "Enter a valid amount",
+                "Amount (e.g., 100 or 12.5)",
+                initial,
+                s -> {
+                    double x = Double.parseDouble(s.replace(',', '.'));
+                    if(!Double.isFinite(x) || x <= 0) throw new IllegalArgumentException("Amount must be a valid number!");
+                    return x;
+                }
+        );
+        if (v == null) throw new RuntimeException("Cancelled");
+        return v;
+    }
+
+
+    private String askNonEmptyUnit(String initial) {
+        String u = askUntilValid(
+                "Unit",
+                "Enter a unit",
+                "Unit (e.g., g, kg, ml, l)",
+                initial,
+                s -> {
+                    String x =  s.trim();
+                    if(x.isEmpty()) throw new RuntimeException("Unit cannot be empty!");
+                    return x;
+                }
+        );
+        if (u == null) throw new RuntimeException("Cancelled");
+        return u;
+    }
+
+
+    private boolean isValidUnit(String unit) {
+        if(unit == null) return false;
+        String u =  unit.trim();
+        return !u.isEmpty() && u.matches(".*[A-Za-z].*");
+    }
+
 }
 
