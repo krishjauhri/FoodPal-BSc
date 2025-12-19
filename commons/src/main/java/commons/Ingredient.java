@@ -77,12 +77,12 @@ public class Ingredient {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Ingredient that = (Ingredient) o;
-        return Double.compare(protein, that.protein) == 0 && Double.compare(fat, that.fat) == 0 && Double.compare(carbs, that.carbs) == 0 && Objects.equals(name, that.name);
+        return id == that.id && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( name, protein, fat, carbs);
+        return Objects.hash(id, name);
     }
 
     @Override
