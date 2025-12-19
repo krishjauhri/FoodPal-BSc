@@ -31,12 +31,9 @@ public class RecipeIngredient {
      * Constructor for tests
      * */
     public RecipeIngredient(Ingredient ingredient, double amount, String unit) {
-        if(amount <= 0){
-            throw new IllegalArgumentException("Amount must be greater than 0.");
-        }
         this.ingredient = ingredient;
-        this.amount = amount;
-        this.unit = unit;
+        setAmount(amount);
+        setUnit(unit);
     }
 
     /**
@@ -44,13 +41,10 @@ public class RecipeIngredient {
      * */
     public RecipeIngredient(Recipe recipe, Ingredient ingredient,
                             double amount, String unit) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than 0.");
-        }
-        this.recipe = recipe;
-        this.ingredient = ingredient;
-        this.amount = amount;
-        this.unit = unit;
+       this.recipe = recipe;
+       this.ingredient = ingredient;
+       setAmount(amount);
+       setUnit(unit);
     }
 
     public long getId() {return id;}
@@ -63,27 +57,34 @@ public class RecipeIngredient {
         return ingredient;
     }
 
+    public void setIngredient(Ingredient ingredient) {
+        this.ingredient = ingredient;
+    }
+
     public double getAmount() {
         return amount;
+    }
+
+    public void setAmount(double amount) {
+        if(!Double.isFinite(amount) || amount <= 0.0) {
+            throw new IllegalArgumentException("Amount must be greater than 0.");
+        }
+        this.amount = amount;
     }
 
     public String getUnit() {
         return unit;
     }
 
-    public void setIngredient(Ingredient ingredient) {
-        this.ingredient = ingredient;
-    }
-
-    public void setAmount(double amount) {
-        if(amount <= 0){
-            throw new IllegalArgumentException("Amount must be greater than 0.");
-        }
-        this.amount = amount;
-    }
-
     public void setUnit(String unit) {
-        this.unit = unit;
+        if(unit == null) {
+            throw new IllegalArgumentException("Unit must not be null.");
+        }
+        String u = unit.trim();
+        if(u.isEmpty()) {
+            throw new IllegalArgumentException("Unit cannot be empty.");
+        }
+        this.unit = u;
     }
 
     @Override
