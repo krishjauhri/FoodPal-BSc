@@ -90,6 +90,7 @@ public class FoodPalMainCtrl {
                     extractIngredients(server.getRecipes());
 
             ctrl.setIngredients(ingredients);
+            ctrl.setRecipes(server.getRecipes());
 
             contentPane.setCenter(view);
 
@@ -364,34 +365,74 @@ public class FoodPalMainCtrl {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) return; // no recipe selected
 
-        TextInputDialog nameDialog = new TextInputDialog();
-        nameDialog.setTitle("Add Ingredient");
-        nameDialog.setHeaderText("Enter ingredient name:");
-        nameDialog.setContentText("Name:");
-        var nameResult = nameDialog.showAndWait();
-        if (nameResult.isEmpty()) return;
-        String name = nameResult.get();
+        List<Ingredient> knownIngredients = extractIngredients(server.getRecipes());
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Ingredient");
 
+        ComboBox<Ingredient> ingredientCombo = new ComboBox<>();
+        ingredientCombo.setItems(FXCollections.observableArrayList(knownIngredients));
+        ingredientCombo.setPromptText("Select existing ingredient");
+
+        TextField newIngredientField = new TextField();
+        newIngredientField.setPromptText("Or enter new ingredient name");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.add(new Label("Existing ingredient:"), 0, 0);
+        grid.add(ingredientCombo, 1, 0);
+        grid.add(new Label("New ingredient:"), 0, 1);
+        grid.add(newIngredientField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes()
+                .addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) return;
+
+        Ingredient ingredient;
+
+        // Decide: reuse or create
+        if (ingredientCombo.getValue() != null) {
+            ingredient = ingredientCombo.getValue();
+        } else {
+            String name = newIngredientField.getText().trim();
+            if (name.isEmpty()) return;
+
+            ingredient = server.createIngredient(name, 0, 0, 0);
+        }
+
+        // Amount
         TextInputDialog amountDialog = new TextInputDialog();
         amountDialog.setTitle("Amount");
         amountDialog.setHeaderText("Enter amount:");
-        amountDialog.setContentText("Amount (Example: 200):");
-        var amountResult = amountDialog.showAndWait();
-        if (amountResult.isEmpty()) return;
-        double amount = Double.parseDouble(amountResult.get());
+        amountDialog.setContentText("Amount:");
 
+        Optional<String> amountResult = amountDialog.showAndWait();
+        if (amountResult.isEmpty()) return;
+
+        double amount;
+        try {
+            amount = Double.parseDouble(amountResult.get());
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        // Unit
         TextInputDialog unitDialog = new TextInputDialog();
         unitDialog.setTitle("Unit");
         unitDialog.setHeaderText("Enter unit:");
-        unitDialog.setContentText("Unit (g, ml, pcs, ...):");
-        var unitResult = unitDialog.showAndWait();
+        unitDialog.setContentText("Unit:");
+
+        Optional<String> unitResult = unitDialog.showAndWait();
         if (unitResult.isEmpty()) return;
+
         String unit = unitResult.get();
 
-        // Send to backend
-        var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
+        // Add ingredient to recipe
         server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
-
         refreshRecipes();// reload UI
         Recipe updated = data.stream()
                 .filter(r -> r.getId() == recipe.getId())

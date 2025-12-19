@@ -40,8 +40,9 @@ import jakarta.ws.rs.core.GenericType;
 public class ServerUtils {
 
 	private static final String SERVER = "http://localhost:8080/";
+    private final List<Ingredient> knownIngredients = new java.util.ArrayList<>();
 
-	public void getQuotesTheHardWay() throws IOException, URISyntaxException {
+    public void getQuotesTheHardWay() throws IOException, URISyntaxException {
 		var url = new URI("http://localhost:8080/api/quotes").toURL();
 		var is = url.openConnection().getInputStream();
 		var br = new BufferedReader(new InputStreamReader(is));
@@ -64,11 +65,15 @@ public class ServerUtils {
 				.request(APPLICATION_JSON) //
 				.post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
 	}
+
     public List<Recipe> getRecipes() {
-        return ClientBuilder.newClient(new ClientConfig())
+        List<Recipe> recipes = ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/recipes")
                 .request(APPLICATION_JSON)
                 .get(new GenericType<List<Recipe>>() {});
+
+        normalizeIngredients(recipes);
+        return recipes;
     }
 
     public Recipe addRecipe(Recipe recipe) {
@@ -108,7 +113,13 @@ public class ServerUtils {
 	}
 
     public Ingredient createIngredient(String name, double protein, double fat, double carbs) {
+        Ingredient existing = findIngredientByName(name);
+        if (existing != null) {
+            return existing;
+        }
+
         Ingredient ingredient = new Ingredient(name, protein, fat, carbs);
+        knownIngredients.add(ingredient);
 
         return ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/recipes/ingredients")
@@ -167,6 +178,34 @@ public class ServerUtils {
                 .path("api/recipes/" + recipeId + "/ingredients/" + recipeIngredientId)
                 .request(APPLICATION_JSON)
                 .put(Entity.entity(body, APPLICATION_JSON), Recipe.class);
+    }
+
+    private Ingredient findIngredientByName(String name) {
+        for (Ingredient ing : knownIngredients) {
+            if (ing.getName().equalsIgnoreCase(name)) {
+                return ing;
+            }
+        }
+        return null;
+    }
+
+    private void normalizeIngredients(List<Recipe> recipes) {
+        for (Recipe recipe : recipes) {
+            for (RecipeIngredient ri : recipe.getIngredients()) {
+                Ingredient serverIngredient = ri.getIngredient();
+                if (serverIngredient == null) {
+                    continue;
+                }
+
+                Ingredient existing = findIngredientByName(serverIngredient.getName());
+
+                if (existing == null) {
+                    knownIngredients.add(serverIngredient);
+                } else {
+                    ri.setIngredient(existing);
+                }
+            }
+        }
     }
 
     public static class UpdateStepRequest {

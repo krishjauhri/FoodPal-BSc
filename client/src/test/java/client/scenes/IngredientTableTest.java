@@ -70,4 +70,37 @@ public class IngredientTableTest {
         assertEquals(1, result.size());
         assertEquals("Milk", result.get(0).getName());
     }
+
+    @Test
+    void ingredientUsageCountsRecipeOnlyOnce() {
+        Ingredient flour = new Ingredient("Flour", 0, 0, 0);
+
+        RecipeIngredient r1 = new RecipeIngredient(flour, 100, "g");
+        RecipeIngredient r2 = new RecipeIngredient(flour, 200, "g");
+
+        Recipe recipe = new Recipe("Bread", List.of(r1, r2), List.of());
+
+        IngredientOverviewCtrl ctrl = new IngredientOverviewCtrl();
+        ctrl.setRecipes(List.of(recipe));
+
+        int usage = ctrl.countUsage(flour);
+
+        assertEquals(1, usage);
+    }
+
+    @Test
+    void ingredientUsageIsZeroWhenNotUsed() {
+        Ingredient flour = new Ingredient("Flour", 0, 0, 0);
+
+        Recipe recipe = new Recipe("Soup", List.of(), List.of());
+
+        IngredientOverviewCtrl ctrl = new IngredientOverviewCtrl();
+        ctrl.setRecipes(List.of(recipe));
+
+        int usage = ctrl.countUsage(flour);
+
+        assertEquals(0, usage);
+    }
+
+
 }

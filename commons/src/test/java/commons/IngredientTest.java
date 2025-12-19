@@ -25,4 +25,11 @@ class IngredientTest {
     void testHashCode() {
         assertEquals(i1.hashCode(), i2.hashCode());
     }
+
+    @Test
+    void calculateKcalPer100gCorrectly() {
+        Ingredient ingredient = new Ingredient("Test", 10, 5, 20);
+        double kcal = ingredient.calculateKcalPer100g();
+        assertEquals(165.0, kcal);
+    }
 }

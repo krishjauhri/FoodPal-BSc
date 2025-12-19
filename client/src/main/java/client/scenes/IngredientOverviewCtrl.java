@@ -11,6 +11,9 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import java.util.List;
+import commons.Recipe;
+import commons.RecipeIngredient;
+
 
 public class IngredientOverviewCtrl {
 
@@ -29,6 +32,14 @@ public class IngredientOverviewCtrl {
     @FXML
     private Label carbsLabel;
 
+    @FXML
+    private Label kcalLabel;
+
+    @FXML
+    private Label usageLabel;
+
+    private List<Recipe> recipes;
+
     @Inject
     public IngredientOverviewCtrl() {
 
@@ -45,11 +56,38 @@ public class IngredientOverviewCtrl {
                 });
     }
 
+    public void setRecipes(List<Recipe> recipes) {
+        this.recipes = recipes;
+    }
+    int countUsage(Ingredient ingredient) {
+        if (recipes == null) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (Recipe recipe : recipes) {
+            for (RecipeIngredient ri : recipe.getIngredients()) {
+                if (ri.getIngredient() == ingredient) {
+                    count++;
+                    break;
+                }
+            }
+        }
+        return count;
+    }
+
     private void showIngredient(Ingredient ingredient) {
         ingredientName.setText(ingredient.getName());
         proteinLabel.setText("Protein: " + ingredient.getProtein());
         fatLabel.setText("Fat: " + ingredient.getFat());
         carbsLabel.setText("Carbs: " + ingredient.getCarbs());
+
+        double kcal = ingredient.calculateKcalPer100g();
+        kcalLabel.setText("Kcal / 100g: " + String.format("%.1f", kcal));
+
+        int usage = countUsage(ingredient);
+        usageLabel.setText("Used in " + usage + " recipe(s)");
     }
 
     public void setIngredients(List<Ingredient> ingredients) {
