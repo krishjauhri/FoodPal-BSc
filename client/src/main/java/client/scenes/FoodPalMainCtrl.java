@@ -94,6 +94,7 @@ public class FoodPalMainCtrl {
                     extractIngredients(server.getRecipes());
 
             ctrl.setIngredients(ingredients);
+            ctrl.setRecipes(server.getRecipes());
 
             contentPane.setCenter(view);
 
