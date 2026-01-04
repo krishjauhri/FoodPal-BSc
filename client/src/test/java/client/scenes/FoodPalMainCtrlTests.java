@@ -2,10 +2,10 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import client.utils.WebSocketService;
-import commons.Ingredient;
+
 import commons.Recipe;
 import commons.RecipeEvent;
-import commons.RecipeIngredient;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

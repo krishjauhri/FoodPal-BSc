@@ -1,6 +1,5 @@
 package client.scenes;
 
-import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import javafx.collections.FXCollections;
@@ -17,10 +16,6 @@ import commons.RecipeIngredient;
 
 
 public class IngredientOverviewCtrl {
-
-    private  ServerUtils server;
-    private FoodPalMainCtrl mainCtrl;
-
 
     @FXML
     private ListView<Ingredient> ingredientList;
@@ -45,14 +40,10 @@ public class IngredientOverviewCtrl {
 
     private List<Recipe> recipes;
 
-    public void setServer(ServerUtils server) {
-        this.server = server;
-    }
+    @Inject
+    public IngredientOverviewCtrl() {
 
-    public void setMainCtrl(FoodPalMainCtrl mainCtrl) {
-        this.mainCtrl = mainCtrl;
     }
-
 
     @FXML
     public void initialize() {
@@ -118,8 +109,6 @@ public class IngredientOverviewCtrl {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit nutrition");
 
-        TextField nameField = new TextField(selected.getName());
-
         TextField proteinField = new TextField(String.valueOf(selected.getProtein()));
         TextField fatField = new TextField(String.valueOf(selected.getFat()));
         TextField carbsField = new TextField(String.valueOf(selected.getCarbs()));
@@ -128,15 +117,12 @@ public class IngredientOverviewCtrl {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-
-        grid.add(new Label("Protein:"), 0, 1);
-        grid.add(proteinField, 1, 1);
-        grid.add(new Label("Fat:"), 0, 2);
-        grid.add(fatField, 1, 2);
-        grid.add(new Label("Carbs:"), 0, 3);
-        grid.add(carbsField, 1, 3);
+        grid.add(new Label("Protein:"), 0, 0);
+        grid.add(proteinField, 1, 0);
+        grid.add(new Label("Fat:"), 0, 1);
+        grid.add(fatField, 1, 1);
+        grid.add(new Label("Carbs:"), 0, 2);
+        grid.add(carbsField, 1, 2);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes()
@@ -144,63 +130,10 @@ public class IngredientOverviewCtrl {
 
         dialog.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
-                selected.setName(nameField.getText());
                 selected.setProtein(Double.parseDouble(proteinField.getText()));
                 selected.setFat(Double.parseDouble(fatField.getText()));
                 selected.setCarbs(Double.parseDouble(carbsField.getText()));
-
-                Ingredient updated = server.updateIngredient(selected);
-
-                List<Recipe> updatedRecipes = server.getRecipes();
-                mainCtrl.refreshRecipes();
-
-
                 showIngredient(selected);
-            }
-        });
-
-    }
-
-    @FXML
-    public void addIngredient() {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Add ingredient");
-
-        TextField nameField = new TextField();
-        TextField proteinField = new TextField();
-        TextField fatField = new TextField();
-        TextField carbsField = new TextField();
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Protein:"), 0, 1);
-        grid.add(proteinField, 1, 1);
-        grid.add(new Label("Fat:"), 0, 2);
-        grid.add(fatField, 1, 2);
-        grid.add(new Label("Carbs:"), 0, 3);
-        grid.add(carbsField, 1, 3);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes()
-                .addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.showAndWait().ifPresent(result -> {
-            if (result == ButtonType.OK) {
-                Ingredient ingredient = new Ingredient(
-                        nameField.getText(),
-                        Double.parseDouble(proteinField.getText()),
-                        Double.parseDouble(fatField.getText()),
-                        Double.parseDouble(carbsField.getText())
-                );
-
-                //send to server
-                Ingredient saved = server.addIngredient(ingredient);
-
-                ingredientList.getItems().add(saved);
             }
         });
     }
