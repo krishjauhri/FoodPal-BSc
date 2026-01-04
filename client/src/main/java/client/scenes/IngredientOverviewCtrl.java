@@ -1,26 +1,23 @@
 package client.scenes;
 
-import client.utils.ServerUtils;
-import com.google.inject.Inject;
 import commons.Ingredient;
-import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import java.util.List;
 import commons.Recipe;
 import commons.RecipeIngredient;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 
+import java.util.List;
 
 public class IngredientOverviewCtrl {
 
-    private  ServerUtils server;
     private FoodPalMainCtrl mainCtrl;
-
+    private List<Recipe> recipes;
 
     @FXML
     private ListView<Ingredient> ingredientList;
@@ -43,16 +40,9 @@ public class IngredientOverviewCtrl {
     @FXML
     private Label usageLabel;
 
-    private List<Recipe> recipes;
-
-    public void setServer(ServerUtils server) {
-        this.server = server;
-    }
-
     public void setMainCtrl(FoodPalMainCtrl mainCtrl) {
         this.mainCtrl = mainCtrl;
     }
-
 
     @FXML
     public void initialize() {
@@ -68,6 +58,7 @@ public class IngredientOverviewCtrl {
     public void setRecipes(List<Recipe> recipes) {
         this.recipes = recipes;
     }
+
     int countUsage(Ingredient ingredient) {
         if (recipes == null) {
             return 0;
@@ -119,7 +110,6 @@ public class IngredientOverviewCtrl {
         dialog.setTitle("Edit nutrition");
 
         TextField nameField = new TextField(selected.getName());
-
         TextField proteinField = new TextField(String.valueOf(selected.getProtein()));
         TextField fatField = new TextField(String.valueOf(selected.getFat()));
         TextField carbsField = new TextField(String.valueOf(selected.getCarbs()));
@@ -130,7 +120,6 @@ public class IngredientOverviewCtrl {
 
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
-
         grid.add(new Label("Protein:"), 0, 1);
         grid.add(proteinField, 1, 1);
         grid.add(new Label("Fat:"), 0, 2);
@@ -149,16 +138,13 @@ public class IngredientOverviewCtrl {
                 selected.setFat(Double.parseDouble(fatField.getText()));
                 selected.setCarbs(Double.parseDouble(carbsField.getText()));
 
-                Ingredient updated = server.updateIngredient(selected);
-
-                List<Recipe> updatedRecipes = server.getRecipes();
-                mainCtrl.refreshRecipes();
-
+                if (mainCtrl != null) {
+                    mainCtrl.refreshRecipes();
+                }
 
                 showIngredient(selected);
             }
         });
-
     }
 
     @FXML
@@ -197,10 +183,7 @@ public class IngredientOverviewCtrl {
                         Double.parseDouble(carbsField.getText())
                 );
 
-                //send to server
-                Ingredient saved = server.addIngredient(ingredient);
-
-                ingredientList.getItems().add(saved);
+                ingredientList.getItems().add(ingredient);
             }
         });
     }
