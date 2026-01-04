@@ -23,7 +23,9 @@ public class IngredientTableTest {
         Recipe r2 = new Recipe("R2",
                 List.of(r2i1),
                 List.of());
-        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null);
+
+        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null, null);
+
         List<Ingredient> result =
                 ctrl.extractIngredients(List.of(r1, r2));
 
@@ -34,7 +36,7 @@ public class IngredientTableTest {
 
     @Test
     void extractIngredientsFromEmptyRecipes() {
-        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null);
+        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null, null);
         List<Ingredient> result = ctrl.extractIngredients(List.of());
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -47,7 +49,7 @@ public class IngredientTableTest {
                 List.of(),
                 List.of()
         );
-        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null);
+        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null, null);
         List<Ingredient> result =
                 ctrl.extractIngredients(List.of(recipe));
         assertTrue(result.isEmpty());
@@ -64,7 +66,7 @@ public class IngredientTableTest {
                 List.of(valid, invalid),
                 List.of()
         );
-        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null);
+        FoodPalMainCtrl ctrl = new FoodPalMainCtrl(null, null);
         List<Ingredient> result =
                 ctrl.extractIngredients(List.of(recipe));
         assertEquals(1, result.size());
@@ -101,6 +103,4 @@ public class IngredientTableTest {
 
         assertEquals(0, usage);
     }
-
-
 }

@@ -1,11 +1,10 @@
 package client.scenes;
 
-import commons.Ingredient;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.Step;
+import client.utils.WebSocketService;
+import commons.*;
 import com.google.inject.Inject;
 import client.utils.ServerUtils;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -33,6 +32,7 @@ public class FoodPalMainCtrl {
     private Parent ingredientView;
     private boolean ingredientLoaded = false;
     private IngredientOverviewCtrl ingredientCtrl;
+    private final WebSocketService websocket;
 
     private Node recipeView;
 
@@ -57,13 +57,14 @@ public class FoodPalMainCtrl {
     @FXML
     private ListView<RecipeIngredient> ingredientsList;
 
-    private ObservableList<Recipe> data;
+    ObservableList<Recipe> data;
 
     private Recipe selectedRecipe;
 
     @Inject
-    public FoodPalMainCtrl(ServerUtils server) {
+    public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket) {
         this.server = server;
+        this.websocket = websocket;
     }
 
     @FXML
@@ -111,7 +112,22 @@ public class FoodPalMainCtrl {
         data = FXCollections.observableArrayList();
         colRecipeList.setItems(data);
         refreshRecipes();
-
+        if(websocket.isConnected()) {
+            websocket.subscribe("/topic/recipes", RecipeEvent.class, event -> {
+                handleServerEvent(event);
+            });
+        }else{
+            websocket.setConnectionListener(new WebSocketService.ConnectionListener() {
+                @Override
+                public void onConnectSuccess() {
+                    websocket.subscribe("/topic/recipes", RecipeEvent.class, event -> {
+                        handleServerEvent(event);
+                    });
+                }
+                @Override
+                public void onConnectFailed() { System.err.println("WebSocket Connection failed"); }
+            });
+        }
         // listener for detail screen
         colRecipeList.getSelectionModel()
                 .selectedItemProperty()
@@ -122,7 +138,40 @@ public class FoodPalMainCtrl {
                 });
         recipeView = contentPane.getCenter();
     }
-
+    private void handleServerEvent(RecipeEvent event) {
+        Platform.runLater(() -> {
+            switch(event.type){
+                case ADD:
+                    Recipe newRecipe = new Recipe(event.name, new ArrayList<>(), new ArrayList<>());
+                    newRecipe.setId(event.id);
+                    data.add(newRecipe);
+                    break;
+                case DELETE:
+                    data.removeIf(r -> r.getId() == event.id);
+                    //If somebody else has the currently deleted recipe opened, we clear the view
+                    if(selectedRecipe != null && selectedRecipe.getId() == event.id){
+                        selectedRecipe = null;
+                        recipeTitle.setText("This recipe has been deleted, please select another one");
+                        ingredientsList.getItems().clear();
+                        stepsBox.getChildren().clear();
+                    }
+                    break;
+                case UPDATE:
+                    for (int i = 0; i < data.size(); i++) {
+                        Recipe r = data.get(i);
+                        if (r.getId() == event.id) {
+                            r.setName(event.name);
+                            data.set(i, r);
+                            break;
+                        }
+                    }
+                    if (selectedRecipe != null && selectedRecipe.getId() == event.id) {
+                        recipeTitle.setText(event.name);
+                    }
+                    break;
+            }
+        });
+    }
     @FXML
     public void refreshRecipes() {
         var recipes = server.getRecipes();   // GET /api/recipes
@@ -251,7 +300,7 @@ public class FoodPalMainCtrl {
         }
         TextInputDialog dialog = new TextInputDialog(selectedRecipe.getName());
         dialog.setTitle("Edit recipe name");
-        dialog.setHeaderText("Rename recpipe");
+        dialog.setHeaderText("Rename recipe");
         dialog.setContentText("New name:");
 
         dialog.showAndWait().ifPresent(newName -> {
