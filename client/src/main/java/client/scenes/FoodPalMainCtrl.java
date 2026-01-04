@@ -86,7 +86,7 @@ public class FoodPalMainCtrl {
 
             List<Ingredient> ingredients = server.getIngredients();
 
-            ctrl.setServer(server);
+
             ctrl.setMainCtrl(this);
 
             ctrl.setIngredients(ingredients);
