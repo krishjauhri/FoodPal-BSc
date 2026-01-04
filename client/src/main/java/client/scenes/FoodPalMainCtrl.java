@@ -34,6 +34,8 @@ public class FoodPalMainCtrl {
     private IngredientOverviewCtrl ingredientCtrl;
     private final WebSocketService websocket;
 
+
+
     private Node recipeView;
 
     @FXML
@@ -60,6 +62,7 @@ public class FoodPalMainCtrl {
     ObservableList<Recipe> data;
 
     private Recipe selectedRecipe;
+    private List<Recipe> recipes;
 
     @Inject
     public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket) {
@@ -71,16 +74,6 @@ public class FoodPalMainCtrl {
     public void backRecipes() {
         contentPane.setCenter(recipeView);
     }
-
-    public List<Ingredient> extractIngredients(List<Recipe> recipes) {
-        return recipes.stream()
-                .flatMap(r -> r.getIngredients().stream())
-                .map(RecipeIngredient::getIngredient)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-    }
-
     @FXML
     public void showIngredientsList() {
         try {
@@ -91,12 +84,15 @@ public class FoodPalMainCtrl {
 
             IngredientOverviewCtrl ctrl = loader.getController();
 
-            List<Ingredient> ingredients =
-                    extractIngredients(server.getRecipes());
+            List<Ingredient> ingredients = server.getIngredients();
+
+            ctrl.setServer(server);
+            ctrl.setMainCtrl(this);
 
             ctrl.setMainCtrl(this);
             ctrl.setIngredients(ingredients);
             ctrl.setRecipes(server.getRecipes());
+
 
             contentPane.setCenter(view);
 
@@ -178,6 +174,9 @@ public class FoodPalMainCtrl {
     public void refreshRecipes() {
         var recipes = server.getRecipes();   // GET /api/recipes
         data.setAll(recipes);
+
+        //clear the choices when back to recipe interface
+        colRecipeList.getSelectionModel().clearSelection();
     }
 
     @FXML

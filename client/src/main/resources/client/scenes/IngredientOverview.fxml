@@ -14,6 +14,7 @@
                 <ListView fx:id="ingredientList"/>
                 <VBox spacing="12">
                     <Label fx:id="ingredientName"/>
+                    <Button text="Add Ingredient" onAction="#addIngredient"/>
                     <Button text="Edit nutrition" onAction="#editIngredient"/>
 
                     <Label fx:id="proteinLabel" text="Protein:"/>
