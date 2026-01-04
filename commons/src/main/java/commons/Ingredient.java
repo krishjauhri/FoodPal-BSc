@@ -12,7 +12,7 @@ public class Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String name;
     private double protein;
     private double fat;
@@ -27,9 +27,9 @@ public class Ingredient {
         this.fat = fat;
         this.carbs = carbs;
     }
-    public Long getId() {return id;}
+    public long getId() {return id;}
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

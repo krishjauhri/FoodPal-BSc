@@ -180,33 +180,6 @@ public class ServerUtils {
                 .put(Entity.entity(body, APPLICATION_JSON), Recipe.class);
     }
 
-    public Ingredient updateIngredient(Ingredient ingredient) {
-        return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER)
-                .path("/api/ingredients")
-                .request(APPLICATION_JSON)
-                .put(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
-    }
-    //Add ingredient in the Ingredient interface
-    public Ingredient addIngredient(Ingredient ingredient) {
-        return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER)
-                .path("/api/ingredients")
-                .request(APPLICATION_JSON)
-                .post(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
-    }
-
-    public List<Ingredient> getIngredients() {
-        return ClientBuilder.newClient(new ClientConfig())
-                .target(SERVER)
-                .path("/api/ingredients")
-                .request(APPLICATION_JSON)
-                .get(new GenericType<List<Ingredient>>() {});
-    }
-
-
-
-
     private Ingredient findIngredientByName(String name) {
         for (Ingredient ing : knownIngredients) {
             if (ing.getName().equalsIgnoreCase(name)) {
