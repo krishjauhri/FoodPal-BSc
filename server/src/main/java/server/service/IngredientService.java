@@ -19,7 +19,7 @@ public class IngredientService {
     }
 
     public Ingredient addIngredient(Ingredient ingredient) {
-        ingredient.setId(null);
+
         return ingredientRepository.save(ingredient);
     }
 
