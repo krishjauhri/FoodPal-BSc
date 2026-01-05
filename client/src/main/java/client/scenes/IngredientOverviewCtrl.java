@@ -66,14 +66,24 @@ public class IngredientOverviewCtrl {
     }
 
     int countUsage(Ingredient ingredient) {
-        if (recipes == null) {
+        if (recipes == null || ingredient == null) {
             return 0;
         }
 
         int count = 0;
         for (Recipe recipe : recipes) {
             for (RecipeIngredient ri : recipe.getIngredients()) {
-                if (ri.getIngredient() == ingredient) {
+                Ingredient used = ri.getIngredient();
+                if (used == null) continue;
+
+                if (ingredient.getId() != null && used.getId() != null) {
+                    if (ingredient.getId().equals(used.getId())) {
+                        count++;
+                        break;
+                    }
+                }
+                //test case(no id)
+                else if (ingredient == used) {
                     count++;
                     break;
                 }
@@ -81,6 +91,8 @@ public class IngredientOverviewCtrl {
         }
         return count;
     }
+
+
 
     private void showIngredient(Ingredient ingredient) {
         ingredientName.setText(ingredient.getName());
