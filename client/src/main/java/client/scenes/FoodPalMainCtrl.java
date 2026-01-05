@@ -94,6 +94,7 @@ public class FoodPalMainCtrl {
             List<Ingredient> ingredients =
                     extractIngredients(server.getRecipes());
 
+            ctrl.setMainCtrl(this);
             ctrl.setIngredients(ingredients);
             ctrl.setRecipes(server.getRecipes());
 
@@ -103,6 +104,7 @@ public class FoodPalMainCtrl {
             e.printStackTrace();
         }
     }
+
 
 
 

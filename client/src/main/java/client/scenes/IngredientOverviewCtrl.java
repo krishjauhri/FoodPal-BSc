@@ -1,21 +1,23 @@
 package client.scenes;
 
-import com.google.inject.Inject;
 import commons.Ingredient;
-import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import java.util.List;
 import commons.Recipe;
 import commons.RecipeIngredient;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 
+import java.util.List;
 
 public class IngredientOverviewCtrl {
+
+    private FoodPalMainCtrl mainCtrl;
+    private List<Recipe> recipes;
 
     @FXML
     private ListView<Ingredient> ingredientList;
@@ -38,11 +40,8 @@ public class IngredientOverviewCtrl {
     @FXML
     private Label usageLabel;
 
-    private List<Recipe> recipes;
-
-    @Inject
-    public IngredientOverviewCtrl() {
-
+    public void setMainCtrl(FoodPalMainCtrl mainCtrl) {
+        this.mainCtrl = mainCtrl;
     }
 
     @FXML
@@ -59,13 +58,13 @@ public class IngredientOverviewCtrl {
     public void setRecipes(List<Recipe> recipes) {
         this.recipes = recipes;
     }
+
     int countUsage(Ingredient ingredient) {
         if (recipes == null) {
             return 0;
         }
 
         int count = 0;
-
         for (Recipe recipe : recipes) {
             for (RecipeIngredient ri : recipe.getIngredients()) {
                 if (ri.getIngredient() == ingredient) {
@@ -133,6 +132,11 @@ public class IngredientOverviewCtrl {
                 selected.setProtein(Double.parseDouble(proteinField.getText()));
                 selected.setFat(Double.parseDouble(fatField.getText()));
                 selected.setCarbs(Double.parseDouble(carbsField.getText()));
+
+                if (mainCtrl != null) {
+                    mainCtrl.refreshRecipes();
+                }
+
                 showIngredient(selected);
             }
         });
