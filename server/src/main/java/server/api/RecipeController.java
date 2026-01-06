@@ -26,7 +26,8 @@ public class RecipeController {
     private final SimpMessagingTemplate message;
 
     public RecipeController(RecipeRepository repo, RecipeService recipeService,
-                            IngredientRepository ingredientRepository, StepRepository stepRepository, SimpMessagingTemplate message) {
+                            IngredientRepository ingredientRepository, StepRepository stepRepository,
+                            SimpMessagingTemplate message) {
         this.repo = repo;
         this.recipeService = recipeService;
         this.ingredientRepository = ingredientRepository;
@@ -37,7 +38,8 @@ public class RecipeController {
     @PostMapping
     public Recipe add(@RequestBody Recipe recipe) {
         Recipe savedRecipe = repo.save(recipe);
-        message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.ADD, savedRecipe.getId(), savedRecipe.getName()));
+        message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.ADD,
+                savedRecipe.getId(), savedRecipe.getName()));
         return savedRecipe;
     }
 
@@ -52,6 +54,9 @@ public class RecipeController {
             @RequestBody RecipeIngredient ingredient) {
         try {
             Recipe updated = recipeService.addIngredient(recipeId, ingredient);
+
+            //for websocket
+            message.convertAndSend("/topic/recipes/" + recipeId, updated);
             return ResponseEntity.ok(updated);
         }
         catch (IllegalArgumentException e) {
@@ -65,6 +70,9 @@ public class RecipeController {
             @RequestBody Step step) {
 
         Recipe updated = recipeService.addStep(recipeId, step);
+
+        //websocket
+        message.convertAndSend("/topic/recipes/" + recipeId, updated);
         return ResponseEntity.ok(updated);
     }
 
@@ -82,7 +90,9 @@ public class RecipeController {
                 .map(existing -> {
                     existing.setName(updated.getName());
                     Recipe savedRecipe = repo.save(existing);
-                    message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE, savedRecipe.getId(), savedRecipe.getName()));
+                    message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE,
+                            savedRecipe.getId(), savedRecipe.getName()));
+                    message.convertAndSend("/topic/recipes/" + id, savedRecipe);
                     return ResponseEntity.ok(savedRecipe);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -106,6 +116,9 @@ public class RecipeController {
             @RequestBody UpdateIngredientRequest req){
         try {
             Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount, req.unit);
+
+            //websocket
+            message.convertAndSend("/topic/recipes/" + recipeId, updated);
             return ResponseEntity.ok(updated);
         }
         catch (IllegalArgumentException e) {
@@ -121,6 +134,9 @@ public class RecipeController {
             @RequestBody UpdateStepRequest req) {
 
         Recipe updated = recipeService.updateStep(recipeId, stepId, req.order, req.text);
+
+        //websocket
+        message.convertAndSend("/topic/recipes/" + recipeId, updated);
         return ResponseEntity.ok(updated);
     }
     public record UpdateStepRequest(int order, String text) {}
@@ -131,8 +147,11 @@ public class RecipeController {
             @PathVariable Long riId){
 
         try {
-            recipeService.deleteIngredient(recipeId, riId);
-            return ResponseEntity.noContent().build();
+            Recipe updated = recipeService.deleteIngredient(recipeId, riId);
+
+            //websocket
+            message.convertAndSend("/topic/recipes/" + recipeId, updated);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -145,6 +164,9 @@ public class RecipeController {
 
         try {
             Recipe updated = recipeService.deleteStep(recipeId, stepId);
+
+            //websockets
+            message.convertAndSend("/topic/recipes/" + recipeId, updated);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
