@@ -135,6 +135,22 @@ public class RecipeControllerTest {
     }
 
     @Test
+    public void updateStepBroadcastsUpdate() {
+        long recipeId = 1L;
+        long stepId = 2L;
+        RecipeController.UpdateStepRequest req = new RecipeController.UpdateStepRequest(5, "Bake it");
+
+        Recipe updated = new Recipe();
+        updated.setId(recipeId);
+
+        when(recipeService.updateStep(recipeId, stepId, 5, "Bake it")).thenReturn(updated);
+
+        sut.updateStep(recipeId, stepId, req);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
+    }
+
+    @Test
     public void deleteIngredientBroadcastsUpdate() {
         long recipeId = 1L;
         long riId = 2L;
@@ -144,6 +160,20 @@ public class RecipeControllerTest {
         when(recipeService.deleteIngredient(recipeId, riId)).thenReturn(updated);
 
         sut.deleteIngredient(recipeId, riId);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
+    }
+
+    @Test
+    public void deleteStepBroadcastsUpdate() {
+        long recipeId = 1L;
+        long stepId = 2L;
+        Recipe updated = new Recipe();
+        updated.setId(recipeId);
+
+        when(recipeService.deleteStep(recipeId, stepId)).thenReturn(updated);
+
+        sut.deleteStep(recipeId, stepId);
 
         verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
     }
