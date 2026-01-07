@@ -47,6 +47,6 @@ Agenda items:
 5.Feedback round(5 min)
 
     What went well
-    What could be improved for next week
+    What can be improved for the upcoming week
 
 6.Questions & closure(3 min)
