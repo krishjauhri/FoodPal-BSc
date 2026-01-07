@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -87,5 +88,63 @@ public class RecipeControllerTest {
         sut.updateRecipe(id, updateInfo);
 
         verify(msgs).convertAndSend(eq("/topic/recipes"), any(RecipeEvent.class));
+    }
+
+    @Test
+    public void addIngredientBroadcastsUpdate() {
+        long recipeId = 1L;
+        RecipeIngredient ri = new RecipeIngredient();
+        Recipe updated = new Recipe("Pizza", new ArrayList<>(), new ArrayList<>());
+        updated.setId(recipeId);
+
+        when(recipeService.addIngredient(recipeId, ri)).thenReturn(updated);
+
+        sut.addIngredientToRecipe(recipeId, ri);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
+    }
+
+    @Test
+    public void addStepBroadcastsUpdate() {
+        long recipeId = 1L;
+        commons.Step step = new commons.Step();
+        Recipe updated = new Recipe("Pizza", null, null);
+        updated.setId(recipeId);
+
+        when(recipeService.addStep(recipeId, step)).thenReturn(updated);
+
+        sut.addStepToRecipe(recipeId, step);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
+    }
+
+    @Test
+    public void updateIngredientBroadcastsUpdate() {
+        long recipeId = 1L;
+        long riId = 2L;
+        RecipeController.UpdateIngredientRequest req = new RecipeController.UpdateIngredientRequest(500, "g");
+
+        Recipe updated = new Recipe();
+        updated.setId(recipeId);
+
+        when(recipeService.updateIngredient(recipeId, riId, 500, "g")).thenReturn(updated);
+
+        sut.updateIngredient(recipeId, riId, req);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
+    }
+
+    @Test
+    public void deleteIngredientBroadcastsUpdate() {
+        long recipeId = 1L;
+        long riId = 2L;
+        Recipe updated = new Recipe();
+        updated.setId(recipeId);
+
+        when(recipeService.deleteIngredient(recipeId, riId)).thenReturn(updated);
+
+        sut.deleteIngredient(recipeId, riId);
+
+        verify(msgs).convertAndSend(eq("/topic/recipes/" + recipeId), eq(updated));
     }
 }
