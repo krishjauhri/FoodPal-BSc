@@ -32,6 +32,10 @@ public class FoodPalMainCtrl {
     private Parent ingredientView;
     private boolean ingredientLoaded = false;
     private IngredientOverviewCtrl ingredientCtrl;
+    private Parent shoppingListView;
+    private boolean shoppingListLoaded = false;
+    private ShoppingListCtrl shoppingListCtrl;
+
     private final WebSocketService websocket;
 
 
@@ -715,6 +719,23 @@ public class FoodPalMainCtrl {
         if(unit == null) return false;
         String u =  unit.trim();
         return !u.isEmpty() && u.matches(".*[A-Za-z].*");
+    }
+
+    @FXML
+    public void showShoppingList() {
+        try {
+            if (!shoppingListLoaded) {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/client/scenes/ShoppingList.fxml")
+                );
+                shoppingListView = loader.load();
+                shoppingListCtrl = loader.getController();
+                shoppingListLoaded = true;
+            }
+            contentPane.setCenter(shoppingListView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
