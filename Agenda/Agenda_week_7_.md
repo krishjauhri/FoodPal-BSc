@@ -2,7 +2,7 @@
 
 * Date: 9 January 2026
 * Time: 15:45
-* Location: PC Hall 2
+* Location: Online
 * Chair: Daria Alexandru
 * Minute taker: Andrei Patrinoiu
 
