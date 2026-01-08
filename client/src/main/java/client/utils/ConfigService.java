@@ -40,7 +40,10 @@ public class ConfigService {
     private void saveConfig(){
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(file, config);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            System.err.println("Failed to save config: " + e.getMessage());
+
+        }
     }
     public boolean isFavourite(long recipeId){
         return config.getFavouriteRecipes().contains(recipeId);
