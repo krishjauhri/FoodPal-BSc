@@ -88,7 +88,7 @@ class ConfigServiceTest {
         assertTrue(sut.isFavourite(1L));
         assertFalse(sut.isFavourite(2L));
         assertTrue(sut.isFavourite(3L));
-        
+
         ConfigService newService = new ConfigService(tempFile);
         assertFalse(newService.isFavourite(2L));
     }

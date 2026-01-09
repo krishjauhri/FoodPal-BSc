@@ -41,6 +41,8 @@
 
                 <VBox styleClass="pane">
                     <children>
+                        <TextField fx:id="searchField"
+                                   promptText="Search recipes (name, ingredients, steps)..."/>
                         <ListView fx:id="colRecipeList" styleClass="recipe-list" VBox.vgrow="ALWAYS"/>
                     </children>
                 </VBox>

@@ -24,6 +24,8 @@ import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.function.Function;
 import client.utils.ConfigService;
+import javafx.scene.control.TextField;
+import client.utils.RecipeSearchService;
 
 
 public class FoodPalMainCtrl {
@@ -64,6 +66,13 @@ public class FoodPalMainCtrl {
 
     @FXML
     private ListView<RecipeIngredient> ingredientsList;
+
+    @FXML
+    private TextField searchField;
+
+    private final RecipeSearchService recipeSearchService = new RecipeSearchService();
+    private List<Recipe> allRecipes = new ArrayList<Recipe>();
+
 
     ObservableList<Recipe> data;
 
@@ -188,25 +197,19 @@ public class FoodPalMainCtrl {
     }
     @FXML
     public void refreshRecipes() {
-        List<Recipe> recipes = server.getRecipes();   // GET /api/recipes
-        data.setAll(recipes);
+        List<Recipe> recipesFromServer = server.getRecipes();
+        allRecipes = new ArrayList<Recipe>(recipesFromServer);
 
-        Set<Long> existingIds = new HashSet<>();
-        for (int i = 0; i < recipes.size(); i++) {
-            existingIds.add(recipes.get(i).getId());
+        String q = "";
+        if (searchField != null && searchField.getText() != null) {
+            q = searchField.getText();
         }
 
-        List<Long> removed = configService.removeNonExistingFavourites(existingIds);
-        if (!removed.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Favourite removed");
-            alert.setHeaderText("A favourite recipe was deleted");
-            alert.setContentText(removed.size() + " favourite recipe(s) were removed because they no longer exist on the server.");
-            alert.showAndWait();
-        }
-
+        List<Recipe> filtered = recipeSearchService.filter(allRecipes, q);
+        data.setAll(filtered);
         colRecipeList.getSelectionModel().clearSelection();
     }
+
 
     @FXML
     private void addRecipe() {
