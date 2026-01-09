@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -68,5 +69,27 @@ class ConfigServiceTest {
         isFav = sut.toggleFavorite(id);
         assertFalse(isFav);
         assertFalse(sut.isFavourite(id));
+    }
+
+    @Test
+    void removeNonExistingFavourites() {
+        sut.addFavourite(1L);
+        sut.addFavourite(2L);
+        sut.addFavourite(3L);
+
+        Set<Long> existing = new java.util.HashSet<>();
+        existing.add(1L);
+        existing.add(3L);
+
+        var removed = sut.removeNonExistingFavourites(existing);
+
+        assertEquals(1, removed.size());
+        assertTrue(removed.contains(2L));
+        assertTrue(sut.isFavourite(1L));
+        assertFalse(sut.isFavourite(2L));
+        assertTrue(sut.isFavourite(3L));
+        
+        ConfigService newService = new ConfigService(tempFile);
+        assertFalse(newService.isFavourite(2L));
     }
 }
