@@ -250,9 +250,7 @@ public class FoodPalMainCtrl {
         if (websocket.isConnected()) {
             String topic = "/topic/recipes/" + recipe.getId();
             currentRecipeSubscription = websocket.subscribe(topic, Recipe.class, updatedRecipe -> {
-                // 3. Receive full recipe object and update UI
                 Platform.runLater(() -> {
-                    // Important: Only update if the user hasn't switched recipes in the meantime
                     if (selectedRecipe != null && selectedRecipe.getId() == updatedRecipe.getId()) {
                         renderRecipeDetails(updatedRecipe);
                     }
