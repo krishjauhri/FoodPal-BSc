@@ -23,12 +23,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.function.Function;
+import client.utils.ConfigService;
+
 
 public class FoodPalMainCtrl {
 
 
     private final ServerUtils server;
-
+    private final ConfigService configService;
     private Parent ingredientView;
     private boolean ingredientLoaded = false;
     private IngredientOverviewCtrl ingredientCtrl;
@@ -69,8 +71,9 @@ public class FoodPalMainCtrl {
     private List<Recipe> recipes;
 
     @Inject
-    public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket) {
+    public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket, ConfigService configService) {
         this.server = server;
+        this.configService = configService;
         this.websocket = websocket;
     }
 
@@ -149,6 +152,15 @@ public class FoodPalMainCtrl {
                     data.add(newRecipe);
                     break;
                 case DELETE:
+                    if (configService.isFavourite(event.id)) {
+                        configService.removeFavourite(event.id);
+
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Favourite removed");
+                        alert.setHeaderText("A favourite recipe was deleted");
+                        alert.setContentText("A recipe you starred was deleted by someone else and was removed from your favourites.");
+                        alert.showAndWait();
+                    }
                     data.removeIf(r -> r.getId() == event.id);
                     //If somebody else has the currently deleted recipe opened, we clear the view
                     if(selectedRecipe != null && selectedRecipe.getId() == event.id){
@@ -176,10 +188,23 @@ public class FoodPalMainCtrl {
     }
     @FXML
     public void refreshRecipes() {
-        var recipes = server.getRecipes();   // GET /api/recipes
+        List<Recipe> recipes = server.getRecipes();   // GET /api/recipes
         data.setAll(recipes);
 
-        //clear the choices when back to recipe interface
+        Set<Long> existingIds = new HashSet<>();
+        for (int i = 0; i < recipes.size(); i++) {
+            existingIds.add(recipes.get(i).getId());
+        }
+
+        List<Long> removed = configService.removeNonExistingFavourites(existingIds);
+        if (!removed.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Favourite removed");
+            alert.setHeaderText("A favourite recipe was deleted");
+            alert.setContentText(removed.size() + " favourite recipe(s) were removed because they no longer exist on the server.");
+            alert.showAndWait();
+        }
+
         colRecipeList.getSelectionModel().clearSelection();
     }
 

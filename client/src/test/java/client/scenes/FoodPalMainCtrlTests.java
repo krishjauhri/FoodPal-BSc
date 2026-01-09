@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
 import client.utils.WebSocketService;
 
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.simp.stomp.StompSession;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +66,13 @@ public class FoodPalMainCtrlTests {
     void setUp() throws Exception {
         server = new StubServerUtils();
         websocket = new StubWebSocketService();
-        sut = new FoodPalMainCtrl(server, websocket);
+        server = new StubServerUtils();
+        websocket = new StubWebSocketService();
+
+        File temp = File.createTempFile("foodpal_test_config", ".json");
+        ConfigService config = new ConfigService(temp);
+
+        sut = new FoodPalMainCtrl(server, websocket, config);
 
         // Inject UI components
         // We initialize these here. If initJavaFX above skipped the tests, this code won't matter.

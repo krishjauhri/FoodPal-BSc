@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class ConfigService {
     private static final String configFile = "foodpal_config.json";
@@ -72,5 +73,24 @@ public class ConfigService {
     public ClientConfig getConfig(){
         return config;
     }
+
+    public List<Long> removeNonExistingFavourites(java.util.Set<Long> existingIds) {
+        List<Long> removed = new java.util.ArrayList<>();
+        var favs = config.getFavouriteRecipes();
+
+        // make copy for save iteration.
+        for (Long id : new java.util.ArrayList<>(favs)) {
+            if (!existingIds.contains(id)) {
+                favs.remove(id);
+                removed.add(id);
+            }
+        }
+
+        if (!removed.isEmpty()) {
+            saveConfig();
+        }
+        return removed;
+    }
+
 
 }
