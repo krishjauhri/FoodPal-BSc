@@ -236,20 +236,7 @@ public class FoodPalMainCtrl {
     }
 
     private void refreshAndReloadSelected(){
-        long currentId = selectedRecipe.getId();
         refreshRecipes();
-
-        Recipe updated = data.stream()
-                .filter(r -> r.getId() == currentId)
-                .findFirst()
-                .orElse(null);
-        if(updated != null){
-            showRecipe(updated);
-        }else{
-            stepsBox.getChildren().clear();
-            ingredientsList.getItems().clear();
-            recipeTitle.setText("");
-        }
     }
     public void showRecipe(Recipe recipe) {
         this.selectedRecipe = recipe;
@@ -267,7 +254,6 @@ public class FoodPalMainCtrl {
                 Platform.runLater(() -> {
                     // Important: Only update if the user hasn't switched recipes in the meantime
                     if (selectedRecipe != null && selectedRecipe.getId() == updatedRecipe.getId()) {
-                        System.out.println("Live update received for: " + updatedRecipe.getName());
                         renderRecipeDetails(updatedRecipe);
                     }
                 });
