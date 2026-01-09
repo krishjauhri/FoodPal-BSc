@@ -23,6 +23,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.function.Function;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 public class FoodPalMainCtrl {
 
@@ -33,6 +34,7 @@ public class FoodPalMainCtrl {
     private boolean ingredientLoaded = false;
     private IngredientOverviewCtrl ingredientCtrl;
     private final WebSocketService websocket;
+    private StompSession.Subscription currentRecipeSubscription;
 
     private Node recipeView;
 
@@ -251,25 +253,47 @@ public class FoodPalMainCtrl {
     }
     public void showRecipe(Recipe recipe) {
         this.selectedRecipe = recipe;
-        // title
+
+        // Remove old subscription
+        if (currentRecipeSubscription != null) {
+            currentRecipeSubscription.unsubscribe();
+        }
+
+        // Subscribe to new recipe channel
+        if (websocket.isConnected()) {
+            String topic = "/topic/recipes/" + recipe.getId();
+            currentRecipeSubscription = websocket.subscribe(topic, Recipe.class, updatedRecipe -> {
+                // 3. Receive full recipe object and update UI
+                Platform.runLater(() -> {
+                    // Important: Only update if the user hasn't switched recipes in the meantime
+                    if (selectedRecipe != null && selectedRecipe.getId() == updatedRecipe.getId()) {
+                        System.out.println("Live update received for: " + updatedRecipe.getName());
+                        renderRecipeDetails(updatedRecipe);
+                    }
+                });
+            });
+        }
+        renderRecipeDetails(recipe);
+    }
+
+        private void renderRecipeDetails(Recipe recipe) {
+        this.selectedRecipe = recipe;
         recipeTitle.setText(recipe.getName());
         showIngredients(recipe);
 
-        // steps
         stepsBox.getChildren().clear();
         if (recipe.getSteps().isEmpty()) {
             stepsBox.getChildren().add(new Label("No steps found"));
         } else {
-            //sort steps by order
             recipe.getSteps().sort(Comparator.comparingInt(Step::getOrder));
-
             for (Step step : recipe.getSteps()) {
                 HBox row = new HBox(10);
-                Label stepLabel = new Label(step.getOrder() + ". " +  step.getText());
+                Label stepLabel = new Label(step.getOrder() + ". " + step.getText());
                 stepLabel.setWrapText(true);
 
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
+
                 Button editBtn = new Button("Edit");
                 editBtn.setOnAction(event -> editStep(step));
 
