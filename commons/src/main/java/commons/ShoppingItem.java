@@ -12,7 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Shoppingitem {
+public class ShoppingItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,21 +21,32 @@ public class Shoppingitem {
     private String ingredientName;
     private double amount;
     private String unit;
+
     // The name of the recipe where the item came from
     private String sourceRecipe;
 
     @SuppressWarnings("unused")
-    private Shoppingitem() {
+    private ShoppingItem() {
         // for object mappers
     }
 
-    public Shoppingitem(String ingredientName, double amount, String unit,
+    public ShoppingItem(String ingredientName) {
+        this(ingredientName, 0, null, null);
+    }
+
+    public ShoppingItem(String ingredientName, double amount, String unit) {
+        this(ingredientName, amount, unit, null);
+    }
+
+    public ShoppingItem(String ingredientName, double amount, String unit,
                         String sourceRecipe) {
         this.ingredientName = ingredientName;
         this.amount = amount;
         this.unit = unit;
         this.sourceRecipe = sourceRecipe;
     }
+
+    public long getId() { return id; }
 
     public String getIngredientName() {
         return ingredientName;

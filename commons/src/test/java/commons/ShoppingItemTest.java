@@ -10,7 +10,7 @@ public class ShoppingItemTest {
 
     @Test
     public void testConstructor() {
-        var s = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
+        var s = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
         assertEquals("Salt", s.getIngredientName());
         assertEquals(5, s.getAmount());
         assertEquals("g", s.getUnit());
@@ -19,7 +19,7 @@ public class ShoppingItemTest {
 
     @Test
     public void testGettersAndSetters() {
-        var item = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
+        var item = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
         item.setIngredientName("Sugar");
         item.setAmount(10);
         item.setUnit("h");
@@ -33,21 +33,21 @@ public class ShoppingItemTest {
 
     @Test
     public void testEqualsSameValues() {
-        var a = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
-        var b = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
+        var a = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
+        var b = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
         assertEquals(a, b);
     }
 
     @Test
     public void testEqualsDifferentValues() {
-        var a = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
-        var b = new Shoppingitem("Pepper", 7, "ml", "Pasta");
+        var a = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
+        var b = new ShoppingItem("Pepper", 7, "ml", "Pasta");
         assertNotEquals(a, b);
     }
 
     @Test
     public void testToStringContainsFields() {
-        var item = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
+        var item = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
         var str = item.toString();
         assertTrue(str.contains("Salt"));
         assertTrue(str.contains("5.0"));
@@ -57,15 +57,15 @@ public class ShoppingItemTest {
 
     @Test
     public void testHashCodeSameValues() {
-        var a = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
-        var b = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
+        var a = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
+        var b = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     public void testHashCodeDifferentValues() {
-        var a = new Shoppingitem("Salt", 5, "g", "Pizza Dough");
-        var b = new Shoppingitem("Pepper", 7, "ml", "Pasta");
+        var a = new ShoppingItem("Salt", 5, "g", "Pizza Dough");
+        var b = new ShoppingItem("Pepper", 7, "ml", "Pasta");
         assertNotEquals(a.hashCode(), b.hashCode());
     }
 }

@@ -26,9 +26,8 @@
                 <Button onAction="#refreshRecipes" text="Refresh" styleClass="btn-secondary" />
                 <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#addRecipe" text="Add Recipe" styleClass="btn-primary" />
                 <Button text="Ingredients" onAction="#showIngredientsList"/>
+                <Button text="Shopping List" onAction="#showShoppingList"/>
                 <Button text="Recipes" onAction="#backRecipes"/>
-
-
 
             </children>
         </HBox>

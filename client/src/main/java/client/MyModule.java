@@ -16,6 +16,7 @@
 package client;
 
 import client.scenes.*;
+import client.utils.ConfigService;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -34,5 +35,6 @@ public class MyModule implements Module {
         binder.bind(ServerUtils.class).in(Scopes.SINGLETON);
         binder.bind(WebSocketService.class).in(Scopes.SINGLETON);
         binder.bind(FoodPalMainCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(ConfigService.class).in(Scopes.SINGLETON);
     }
 }
