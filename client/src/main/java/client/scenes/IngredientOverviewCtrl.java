@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,24 +62,7 @@ public class IngredientOverviewCtrl {
         this.recipes = recipes;
     }
 
-//    int countUsage(Ingredient ingredient) {
-//        if (recipes == null || ingredient == null || ingredient.getId() == null) {
-//            return 0;
-//        }
-//        int count = 0;
-//        for (Recipe recipe : recipes) {
-//            for (RecipeIngredient ri : recipe.getIngredients()) {
-//                Ingredient riIngredient = ri.getIngredient();
-//
-//                if (riIngredient != null && riIngredient.getId() != null
-//                        && riIngredient.getId().equals(ingredient.getId())) {
-//                    count++;
-//                    break;
-//                }
-//            }
-//        }
-//        return count;
-//    }
+
 int countUsage(Ingredient ingredient) {
     if (recipes == null || ingredient == null) {
         return 0;
