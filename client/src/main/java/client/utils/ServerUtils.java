@@ -66,6 +66,17 @@ public class ServerUtils {
 				.post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
 	}
 
+    public void deleteIngredient(long ingredientId) {
+        ClientBuilder
+                .newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/ingredients/" + ingredientId)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
+
+
+
     public List<Recipe> getRecipes() {
         List<Recipe> recipes = ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER).path("api/recipes")

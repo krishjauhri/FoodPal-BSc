@@ -1,5 +1,6 @@
 package server.service;
 
+
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Step;
@@ -14,14 +15,11 @@ public class RecipeService {
     private final RecipeIngredientRepository ingredientRepository;
     private final StepRepository stepRepository;
 
-    public RecipeService(RecipeRepository recipeRepository,
-                         RecipeIngredientRepository ingredientRepository,
-                         StepRepository stepRepository) {
+    public RecipeService(RecipeRepository recipeRepository, RecipeIngredientRepository ingredientRepository, StepRepository stepRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.stepRepository = stepRepository;
     }
-
     public Recipe addIngredient(Long recipeId, RecipeIngredient ingredient){
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RuntimeException("Recipe not found"));

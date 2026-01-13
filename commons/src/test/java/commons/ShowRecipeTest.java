@@ -28,8 +28,8 @@ public class ShowRecipeTest {
         ing1.setName("Potato");
         Ingredient ing2 = new Ingredient();
         ing2.setName("Tomato");
-        RecipeIngredient ri1 = new RecipeIngredient(ing1, 300, "g");
-        RecipeIngredient ri2 = new RecipeIngredient(ing2, 300, "g");
+        RecipeIngredient ri1 = new RecipeIngredient(ing1, 300.0, "g");
+        RecipeIngredient ri2 = new RecipeIngredient(ing2, 300.0, "g");
         r.addIngredient(ri1);
         r.addIngredient(ri2);
         assertEquals(2, r.getIngredients().size());
@@ -85,7 +85,7 @@ public class ShowRecipeTest {
         r.setName("Tomato Pasta");
         Ingredient ing = new Ingredient();
         ing.setName("Noodle");
-        RecipeIngredient ri = new RecipeIngredient(ing, 300, "g");
+        RecipeIngredient ri = new RecipeIngredient(ing, 300.0, "g");
         Step s = new Step(1, "Boil noodles");
         r.addIngredient(ri);
         r.addStep(s);

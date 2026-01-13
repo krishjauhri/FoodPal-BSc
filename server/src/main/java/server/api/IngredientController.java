@@ -1,5 +1,6 @@
 package server.api;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.service.IngredientService;
 import commons.Ingredient;
@@ -31,5 +32,13 @@ public class IngredientController {
         return ingredientService.getAllIngredients();
     }
 
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteIngredients(@PathVariable Long id) {
+        try{
+            ingredientService.deleteIngredientInRecipe(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

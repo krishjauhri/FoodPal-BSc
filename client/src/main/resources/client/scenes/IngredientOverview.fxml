@@ -16,6 +16,7 @@
                     <Label fx:id="ingredientName"/>
                     <Button text="Add Ingredient" onAction="#addIngredient"/>
                     <Button text="Edit nutrition" onAction="#editIngredient"/>
+                    <Button text="Delete Ingredient" onAction="#deleteIngredient"/>
 
                     <Label fx:id="proteinLabel" text="Protein:"/>
                     <Label fx:id="fatLabel" text="Fat:"/>

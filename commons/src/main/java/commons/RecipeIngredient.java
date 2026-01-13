@@ -101,8 +101,34 @@ public class RecipeIngredient {
 
     @Override
     public String toString() {
-        if (ingredient == null) return "Unknown ingredient";
-        return amount + " " + unit + " " + ingredient.getName();
+//        if (ingredient == null) return "Unknown ingredient";
+//        return amount + " " + unit + " " + ingredient.getName();
+        return displayAmount();
     }
+
+    public String displayAmount() {
+        double displayAmount = amount;
+        String displayUnit = unit;
+
+        if (unit.equals("g") && amount >= 1000) {
+            displayAmount = amount / 1000.0;
+            displayUnit = "kg";
+
+        } else if (unit.equals("ml") && amount >= 1000) {
+            displayAmount = amount / 1000.0;
+            displayUnit = "l";
+        }
+
+        return formatAmount(displayAmount) + " " + displayUnit + " " + ingredient.getName();
+
+    }
+    private String formatAmount(double value) {
+        if (value == Math.floor(value)) {
+            return String.valueOf((int) value);
+        }
+        return String.valueOf(value);
+    }
+
+
 
 }
