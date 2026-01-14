@@ -118,13 +118,20 @@ public class FoodPalMainCtrl {
     }
 
 
-
-
+    /**
+     * Initializes the controller after the FXML file has been loaded.
+     * This method sets up the main UI components, including:
+     *   Configuring the recipe list with a custom factory to handle the favorite star functionality.
+     *   Establishing WebSocket subscriptions for real-time recipe updates from the server.
+     *   Setting up selection listeners to update the detail view when a recipe is clicked.
+     *   Performing the initial data fetch to populate the list.
+     */
     @FXML
     public void initialize() {
         // initialize list
         data = FXCollections.observableArrayList();
         colRecipeList.setItems(data);
+        colRecipeList.setCellFactory(r -> new RecipeListViewCell(configService));
         refreshRecipes();
         if(websocket.isConnected()) {
             websocket.subscribe("/topic/recipes", RecipeEvent.class, event -> {
