@@ -70,6 +70,7 @@
                             <children>
                                 <HBox spacing="8" alignment="CENTER_LEFT">
                                     <Label text="Ingredients" styleClass="card-title" />
+                                    <Button mnemonicParsing="false" onAction="#openShoppingOverviewForSelectedRecipe" text="Shop" styleClass="btn-secondary"/>
                                     <HBox HBox.hgrow="ALWAYS"/>
                                     <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add" styleClass="btn-primary" />
                                     <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit" styleClass="btn-secondary" />

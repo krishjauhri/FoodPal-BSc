@@ -80,6 +80,11 @@ public class FoodPalMainCtrl {
     private Recipe selectedRecipe;
     private List<Recipe> recipes;
 
+    private Parent shoppingOverviewView;
+    private boolean shoppingOverviewLoaded = false;
+    private ShoppingListOverviewCtrl shoppingOverviewCtrl;
+
+
     @Inject
     public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket, ConfigService configService) {
         this.server = server;
@@ -824,6 +829,59 @@ public class FoodPalMainCtrl {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    public void openShoppingOverviewForSelectedRecipe() {
+        if (selectedRecipe == null) return;
+
+        try {
+            if (!shoppingOverviewLoaded) {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/client/scenes/ShoppingListOverview.fxml")
+                );
+                shoppingOverviewView = loader.load();
+                shoppingOverviewCtrl = loader.getController();
+                shoppingOverviewCtrl.setMainCtrl(this);
+                shoppingOverviewLoaded = true;
+            }
+
+            List<ShoppingItem> rows = selectedRecipe.getIngredients().stream()
+                    .filter(ri -> ri.getIngredient() != null)
+                    .map(ri -> new ShoppingItem(
+                            ri.getIngredient().getName(),
+                            ri.getAmount(),
+                            ri.getUnit(),
+                            selectedRecipe.getName()
+                    ))
+                    .toList();
+
+            shoppingOverviewCtrl.setItems(rows);
+            contentPane.setCenter(shoppingOverviewView);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addOverviewItemsToShoppingList(List<ShoppingItem> overviewItems) {
+        if (overviewItems == null || overviewItems.isEmpty()) return;
+
+        if (!shoppingListLoaded) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/scenes/ShoppingList.fxml"));
+                shoppingListView = loader.load();
+                shoppingListCtrl = loader.getController();
+                shoppingListLoaded = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        shoppingListCtrl.addItems(overviewItems);
+        contentPane.setCenter(shoppingListView);
+    }
+
 
 }
 
