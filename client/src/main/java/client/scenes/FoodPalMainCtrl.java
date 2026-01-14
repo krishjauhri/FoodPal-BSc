@@ -106,7 +106,6 @@ public class FoodPalMainCtrl {
             ctrl.setServer(server);
             ctrl.setMainCtrl(this);
 
-            ctrl.setMainCtrl(this);
             ctrl.setIngredients(ingredients);
             ctrl.setRecipes(server.getRecipes());
 
@@ -453,30 +452,85 @@ public class FoodPalMainCtrl {
 
     }
 
+    public Ingredient createNewIngredient() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("New Ingredient");
+        dialog.setHeaderText("Create new ingredient");
+        dialog.setContentText("Name:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isEmpty()){
+            return null;
+        }
+        String name = result.get().trim();
+
+        if (name.isEmpty()) {
+            showError("Invalid name", "Ingredient name cannot be empty!");
+            return null;
+        }
+        try {
+            // nutrition values default to 0 for recipe interface
+            Ingredient newIngredient = new Ingredient(name, 0, 0, 0);
+            return server.addIngredient(newIngredient);
+        } catch (Exception e) {
+            showError("Server error", "Can not create ingredient");
+            return null;
+        }
+    }
+
     @FXML
     private void addIngredient() {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) return; // no recipe selected
 
-        String name;
-        TextInputDialog nameDialog = new TextInputDialog();
-        nameDialog.setTitle("Add Ingredient");
-        nameDialog.setHeaderText("Enter ingredient name:");
-        nameDialog.setContentText("Name:");
+        // choose an existing ingredient or create a new one
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Ingredient");
 
-        while (true) {
-            var nameResult = nameDialog.showAndWait();
-            if (nameResult.isEmpty()) return;
-            name = nameDialog.getEditor().getText();
-            if(name != null) name = name.trim();
-            if(name != null && name.matches(".*[A-Za-z].*")) {
-                break;
+        // existing ingredients in a dropdown list
+        ComboBox<Ingredient> ingredientBox = new ComboBox<>();
+        List<Ingredient> ingredients = server.getIngredients();
+        //change the normal list to list observable by javafx
+        ObservableList<Ingredient> observableIngredients = FXCollections.observableArrayList(ingredients);
+        ingredientBox.setItems(observableIngredients);
+
+        // Button to create new one
+        Button newIngredientBtn = new Button("Add new ingredient");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.add(new Label("Ingredient:"), 0, 0);
+        grid.add(ingredientBox, 1, 0);
+        grid.add(newIngredientBtn, 2, 0);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // creating new ingredient when clicking the Add new ingredient button
+        newIngredientBtn.setOnAction(event -> {
+            Ingredient created = createNewIngredient();
+            //first add the new ingredient into the dropdown box, then select it automatically
+            if (created != null) {
+                ingredientBox.getItems().add(created);
+                ingredientBox.getSelectionModel().select(created);
             }
-            showError("Illegal value", "Ingredient must contain at least one letter. Try again.");
-            nameDialog.getEditor().selectAll();
+        });
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
         }
 
-        double amount;
+        Ingredient ingredient = ingredientBox.getSelectionModel().getSelectedItem();
+        if (ingredient == null) {
+            showError("No ingredient selected", "Please select an ingredient first!");
+            return;
+        }
+
+
+        Double amount;
         while (true) {
         TextInputDialog amountDialog = new TextInputDialog();
         amountDialog.setTitle("Amount");
@@ -494,7 +548,7 @@ public class FoodPalMainCtrl {
             break;
             }
         catch (NumberFormatException e) {
-            showError("Invalid amount", "Amount must be a valid number.");
+            showError("Invalid amount", "Amount must be a number or left empty.");
         }
         }
 
@@ -514,14 +568,12 @@ public class FoodPalMainCtrl {
             unitDialog.getEditor().selectAll();
         }
 
-        // Send to backend
+        //sent to backend
         try {
-            var ingredient = server.createIngredient(name, 0, 0, 0); // nutrition later
             server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
         }
         catch (Exception e) {
             showError("Server error", "Server rejected the value, try again");
-            return;
         }
 
         refreshRecipes();// reload UI

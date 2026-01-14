@@ -6,14 +6,11 @@ import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
 import java.util.List;
+import java.util.Optional;
 
 public class IngredientOverviewCtrl {
 
@@ -65,34 +62,34 @@ public class IngredientOverviewCtrl {
         this.recipes = recipes;
     }
 
-    int countUsage(Ingredient ingredient) {
-        if (recipes == null || ingredient == null) {
-            return 0;
-        }
 
-        int count = 0;
-        for (Recipe recipe : recipes) {
-            for (RecipeIngredient ri : recipe.getIngredients()) {
-                Ingredient used = ri.getIngredient();
-                if (used == null) continue;
+int countUsage(Ingredient ingredient) {
+    if (recipes == null || ingredient == null) {
+        return 0;
+    }
+    int count = 0;
+    for (Recipe recipe : recipes) {
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            Ingredient riIngredient = ri.getIngredient();
+            if (riIngredient == null) continue;
 
-                if (ingredient.getId() != null && used.getId() != null) {
-                    if (ingredient.getId().equals(used.getId())) {
-                        count++;
-                        break;
-                    }
-                }
-                //test case(no id)
-                else if (ingredient == used) {
-                    count++;
-                    break;
-                }
+            boolean same;
+
+            if (ingredient.getId() != null && riIngredient.getId() != null) {
+                same = riIngredient.getId().equals(ingredient.getId());
+            }
+            else {
+                same = riIngredient == ingredient;
+            }
+            if (same) {
+                count++;
+                break;
             }
         }
-        return count;
     }
 
-
+    return count;
+}
 
     private void showIngredient(Ingredient ingredient) {
         ingredientName.setText(ingredient.getName());
@@ -114,11 +111,33 @@ public class IngredientOverviewCtrl {
     }
 
     @FXML
-    public void editIngredient() {
-        Ingredient selected = ingredientList
-                .getSelectionModel()
-                .getSelectedItem();
+    public void deleteIngredient(){
+        Ingredient ingredient = ingredientList.getSelectionModel().getSelectedItem();
+        int usage = countUsage(ingredient);
+        if (usage > 0) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Delete ingredient");
+            alert.setHeaderText(" Ingredient is used");
+            alert.setContentText("This ingredient is used in " + usage + " recipe(s).\n"
+                    + "If you continue, it will be removed from all the recipes");
 
+            Optional<ButtonType> result = alert.showAndWait();
+            //get rid of the warning interface / choose cancel button
+            if(result.isEmpty() ||  result.get() != ButtonType.OK){
+                return;
+            }
+        }
+        server.deleteIngredient(ingredient.getId());
+        ingredientList.getItems().remove(ingredient);
+        mainCtrl.refreshRecipes();
+
+    }
+
+
+
+    @FXML
+    public void editIngredient() {
+        Ingredient selected = ingredientList.getSelectionModel().getSelectedItem();
         if (selected == null) {
             return;
         }

@@ -13,9 +13,9 @@ public class RecipeIngredientTest {
     @BeforeEach
     public void setUp() {
         ingredient = new Ingredient("Flour", 10, 1, 75);
-        r1 = new RecipeIngredient(ingredient, 500, "g");
-        r2 = new RecipeIngredient(ingredient, 500, "g");
-        r3 = new RecipeIngredient(ingredient, 250, "kg");
+        r1 = new RecipeIngredient(ingredient, 500.0, "g");
+        r2 = new RecipeIngredient(ingredient, 500.0, "g");
+        r3 = new RecipeIngredient(ingredient, 250.0, "kg");
     }
 
     @Test
@@ -28,12 +28,12 @@ public class RecipeIngredientTest {
 
     @Test
     public void testConstructorThrowExceptionForAmountEqualToZero(){
-        assertThrows(IllegalArgumentException.class, () -> new RecipeIngredient(ingredient, 0, "g"));
+        assertThrows(IllegalArgumentException.class, () -> new RecipeIngredient(ingredient, 0.0, "g"));
     }
 
     @Test
     public void testConstructorThrowExceptionForAmountNegative(){
-        assertThrows(IllegalArgumentException.class, () -> new RecipeIngredient(ingredient, -50, "g"));
+        assertThrows(IllegalArgumentException.class, () -> new RecipeIngredient(ingredient, -50.0, "g"));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class RecipeIngredientTest {
         var newIngredient = new Ingredient("Flour", 10, 1, 75);
 
         r1.setIngredient(newIngredient);
-        r1.setAmount(100);
+        r1.setAmount(100.0);
         r1.setUnit("spoons");
 
         assertEquals(newIngredient, r1.getIngredient());
@@ -52,11 +52,11 @@ public class RecipeIngredientTest {
     @Test
     public void setAmountThrowsExceptionWhenAmountIsNotValid(){
         assertThrows(IllegalArgumentException.class, () ->{
-            r1.setAmount(0);
+            r1.setAmount(0.0);
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            r1.setAmount(-20);
+            r1.setAmount(-20.0);
         });
     }
 }

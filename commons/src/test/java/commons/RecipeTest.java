@@ -22,10 +22,10 @@ class RecipeTest {
         sugar = new Ingredient("Sugar", 3, 2, 5);
         coffee = new Ingredient("Coffee", 8, 4, 1);
 
-        flourRecipe = new RecipeIngredient(flour, 100, "g");
-        waterRecipe = new RecipeIngredient(water, 50, "ml");
-        sugarRecipe = new RecipeIngredient(sugar, 25, "g");
-        coffeeRecipe = new RecipeIngredient(coffee, 100, "tablespoon");
+        flourRecipe = new RecipeIngredient(flour, 100.0, "g");
+        waterRecipe = new RecipeIngredient(water, 50.0, "ml");
+        sugarRecipe = new RecipeIngredient(sugar, 25.0, "g");
+        coffeeRecipe = new RecipeIngredient(coffee, 100.0, "tablespoon");
 
         s1 = new Step(1, "Mix ingredients");
         s2 = new Step(2, "Let the dough rest");
@@ -68,7 +68,7 @@ class RecipeTest {
     @Test
     void addIngredient() {
         Ingredient salt = new Ingredient("Salt", 5, 3, 1);
-        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100, "g");
+        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100.0, "g");
         r1.addIngredient(saltRecipe);
         assertTrue(r1.getIngredients().contains(saltRecipe));
     }
@@ -76,7 +76,7 @@ class RecipeTest {
     @Test
     void removeIngredient() {
         Ingredient salt = new Ingredient("Salt", 5, 3, 1);
-        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100, "g");
+        RecipeIngredient saltRecipe = new RecipeIngredient(salt, 100.0, "g");
         r1.addIngredient(saltRecipe);
         r1.removeIngredient(saltRecipe);
         boolean saltStillPresent = false;
