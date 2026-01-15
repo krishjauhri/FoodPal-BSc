@@ -62,12 +62,13 @@
 
                         <VBox spacing="10" styleClass="card" VBox.vgrow="ALWAYS">
                             <children>
-                                <HBox alignment="CENTER_LEFT" spacing="8">
-                                    <Label styleClass="card-title" text="Ingredients" />
-                                    <HBox HBox.hgrow="ALWAYS" />
-                                    <Button mnemonicParsing="false" onAction="#addIngredient" styleClass="btn-primary" text="+ Add" />
-                                    <Button mnemonicParsing="false" onAction="#editSelectedIngredient" styleClass="btn-secondary" text="Edit" />
-                                    <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" styleClass="btn-danger" text="Delete" />
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Label text="Ingredients" styleClass="card-title" />
+                                    <Button mnemonicParsing="false" onAction="#openShoppingOverviewForSelectedRecipe" text="Shop" styleClass="btn-secondary"/>
+                                    <HBox HBox.hgrow="ALWAYS"/>
+                                    <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add" styleClass="btn-primary" />
+                                    <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit" styleClass="btn-secondary" />
+                                    <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete" styleClass="btn-danger" />
                                 </HBox>
 
                                 <ListView fx:id="ingredientsList" VBox.vgrow="ALWAYS" />
