@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.MyFXML;
 import client.utils.WebSocketService;
 import commons.*;
 import com.google.inject.Inject;
@@ -8,7 +9,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -23,6 +23,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.function.Function;
+
+import javafx.util.Pair;
 import org.springframework.messaging.simp.stomp.StompSession;
 import client.utils.ConfigService;
 import javafx.scene.control.TextField;
@@ -33,12 +35,11 @@ public class FoodPalMainCtrl {
 
     private final ServerUtils server;
     private final ConfigService configService;
-    private Parent ingredientView;
-    private boolean ingredientLoaded = false;
-    private IngredientOverviewCtrl ingredientCtrl;
     private Parent shoppingListView;
     private boolean shoppingListLoaded = false;
     private ShoppingListCtrl shoppingListCtrl;
+
+    private MyFXML myFXML;
 
     private final WebSocketService websocket;
     private StompSession.Subscription currentRecipeSubscription;
@@ -80,6 +81,7 @@ public class FoodPalMainCtrl {
     private Recipe selectedRecipe;
     private List<Recipe> recipes;
 
+
     private Parent shoppingOverviewView;
     private boolean shoppingOverviewLoaded = false;
     private ShoppingListOverviewCtrl shoppingOverviewCtrl;
@@ -92,6 +94,10 @@ public class FoodPalMainCtrl {
         this.websocket = websocket;
     }
 
+    public void setMyFXML(MyFXML myFXML) {
+        this.myFXML = myFXML;
+    }
+
     @FXML
     public void backRecipes() {
         contentPane.setCenter(recipeView);
@@ -99,25 +105,27 @@ public class FoodPalMainCtrl {
     @FXML
     public void showIngredientsList() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/client/scenes/IngredientOverview.fxml")
-            );
-            Parent view = loader.load();
+            if (myFXML == null) {
+                throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
+            }
 
-            IngredientOverviewCtrl ctrl = loader.getController();
+            Pair<IngredientOverviewCtrl, Parent> pair =
+                    myFXML.load(IngredientOverviewCtrl.class,
+                            "client", "scenes", "IngredientOverview.fxml");
 
-            List<Ingredient> ingredients = server.getIngredients();
+            IngredientOverviewCtrl ctrl = pair.getKey();
+            Parent view = pair.getValue();
 
             ctrl.setServer(server);
             ctrl.setMainCtrl(this);
 
-            ctrl.setIngredients(ingredients);
+            ctrl.setIngredients(server.getIngredients());
             ctrl.setRecipes(server.getRecipes());
 
 
             contentPane.setCenter(view);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -817,15 +825,19 @@ public class FoodPalMainCtrl {
     public void showShoppingList() {
         try {
             if (!shoppingListLoaded) {
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/client/scenes/ShoppingList.fxml")
-                );
-                shoppingListView = loader.load();
-                shoppingListCtrl = loader.getController();
+                if (myFXML == null) {
+                    throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
+                }
+
+                Pair<ShoppingListCtrl, Parent> pair =
+                        myFXML.load(ShoppingListCtrl.class,
+                                "client", "scenes", "ShoppingList.fxml");
+                shoppingListCtrl = pair.getKey();
+                shoppingListView = pair.getValue();
                 shoppingListLoaded = true;
             }
             contentPane.setCenter(shoppingListView);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -836,13 +848,20 @@ public class FoodPalMainCtrl {
 
         try {
             if (!shoppingOverviewLoaded) {
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/client/scenes/ShoppingListOverview.fxml")
-                );
-                shoppingOverviewView = loader.load();
-                shoppingOverviewCtrl = loader.getController();
+                if (myFXML == null) {
+                    throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
+                }
+
+                Pair<ShoppingListOverviewCtrl, Parent> pair =
+                        myFXML.load(ShoppingListOverviewCtrl.class,
+                                "client", "scenes", "ShoppingListOverview.fxml");
+
+                shoppingOverviewCtrl = pair.getKey();
+                shoppingOverviewView = pair.getValue();
+
                 shoppingOverviewCtrl.setMainCtrl(this);
                 shoppingOverviewLoaded = true;
+
             }
 
             List<ShoppingItem> rows = selectedRecipe.getIngredients().stream()
@@ -868,11 +887,19 @@ public class FoodPalMainCtrl {
 
         if (!shoppingListLoaded) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/scenes/ShoppingList.fxml"));
-                shoppingListView = loader.load();
-                shoppingListCtrl = loader.getController();
+                if (myFXML == null) {
+                    throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
+                }
+
+                Pair<ShoppingListCtrl, Parent> pair =
+                        myFXML.load(ShoppingListCtrl.class,
+                                "client", "scenes", "ShoppingList.fxml");
+
+                shoppingListCtrl = pair.getKey();
+                shoppingListView = pair.getValue();
                 shoppingListLoaded = true;
-            } catch (IOException e) {
+
+            } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
