@@ -56,6 +56,7 @@ public class Main extends Application {
         webSocket.connectAsync("ws://localhost:8080/websocket");
 
         var overview = FXML.load(FoodPalMainCtrl.class, "client", "scenes", "FoodPalMain.fxml");
+        overview.getKey().setMyFXML(FXML);
 
         var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
 

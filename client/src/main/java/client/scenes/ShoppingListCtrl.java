@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class ShoppingListCtrl {
 
@@ -82,6 +83,11 @@ public class ShoppingListCtrl {
             e.printStackTrace();
         }
 
+    }
+
+    public void addItems(List<ShoppingItem> newItems) {
+        if (newItems == null || newItems.isEmpty()) return;
+        items.addAll(newItems);
     }
 
     void addItemForTest(ShoppingItem item) {
