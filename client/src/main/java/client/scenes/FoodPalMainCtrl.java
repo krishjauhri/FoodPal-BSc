@@ -126,6 +126,9 @@ public class FoodPalMainCtrl {
         data = FXCollections.observableArrayList();
         colRecipeList.setItems(data);
         refreshRecipes();
+        if (searchField != null) {
+            searchField.setOnAction(event -> refreshRecipes());
+        }
         if(websocket.isConnected()) {
             websocket.subscribe("/topic/recipes", RecipeEvent.class, event -> {
                 handleServerEvent(event);
