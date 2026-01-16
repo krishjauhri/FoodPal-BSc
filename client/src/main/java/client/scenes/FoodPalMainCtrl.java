@@ -845,6 +845,9 @@ public class FoodPalMainCtrl {
                 shoppingListCtrl = pair.getKey();
                 shoppingListView = pair.getValue();
                 shoppingListLoaded = true;
+                if(shoppingListCtrl != null) {
+                    shoppingListCtrl.setServer(server);
+                }
             }
             contentPane.setCenter(shoppingListView);
         } catch (Exception e) {

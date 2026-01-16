@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ComboBox?>
 
 <BorderPane
         xmlns="http://javafx.com/javafx/25"
@@ -41,7 +42,11 @@
             </padding>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="nameField" promptText="Ingredient name" HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="ingredientBox"
+                          promptText="Select an ingredient"
+                          HBox.hgrow="ALWAYS"
+                          maxWidth="Infinity"/>
+                <Button text="New Ingredient" onAction="#createNewIngredientMain"/>
                 <Button text="Add" onAction="#addItem"/>
             </HBox>
 
