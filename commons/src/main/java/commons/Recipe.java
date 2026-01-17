@@ -14,6 +14,7 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
+    private Integer  servings = 1;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -71,6 +72,22 @@ public class Recipe {
             this.steps = steps;
         else
             this.steps = new ArrayList<>();
+    }
+
+    public int getServings() {
+        if(servings == null){
+            return 1;
+        }
+        else{
+            return servings;
+        }
+    }
+
+    public void setServings(int servings) {
+        if (servings <= 0) {
+            throw new IllegalArgumentException("Servings must be > 0");
+        }
+        this.servings = servings;
     }
 
 

@@ -63,7 +63,7 @@ public class IngredientOverviewCtrl {
     }
 
 
-int countUsage(Ingredient ingredient) {
+    public int countUsage(Ingredient ingredient) {
     if (recipes == null || ingredient == null) {
         return 0;
     }
@@ -87,7 +87,6 @@ int countUsage(Ingredient ingredient) {
             }
         }
     }
-
     return count;
 }
 

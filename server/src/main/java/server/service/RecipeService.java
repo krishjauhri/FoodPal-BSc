@@ -100,4 +100,11 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
+    public Recipe updateServings(long id, int servings) {
+        Recipe recipe = recipeRepository.findById(id).orElseThrow();
+        recipe.setServings(servings);
+        return recipeRepository.save(recipe);
+    }
+
+
 }
