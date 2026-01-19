@@ -282,4 +282,12 @@ public class ServerUtils {
                 .delete();
     }
 
+    public void updateRecipeServings(long recipeId, int servings) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/recipes/" + recipeId + "/servings")
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(servings, APPLICATION_JSON));
+    }
+
 }

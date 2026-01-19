@@ -52,6 +52,7 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="recipeTitle" styleClass="section-title" text="Select one recipe" />
                             <HBox HBox.hgrow="ALWAYS" />
+                            <Button text="Edit servings" onAction="#editServings"/>
                             <Button onAction="#editRecipeName" styleClass="btn-secondary" text="Edit name" />
                             <Button onAction="#deleteSelectedRecipe" styleClass="btn-danger" text="Delete" />
                             <Button onAction="#downloadRecipe" styleClass="btn-secondary" text="Download" />

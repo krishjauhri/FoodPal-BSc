@@ -172,4 +172,10 @@ public class RecipeController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PutMapping("/{id}/servings")
+    public Recipe updateServings(@PathVariable long id, @RequestBody int servings) {
+        return recipeService.updateServings(id, servings);
+    }
+
 }

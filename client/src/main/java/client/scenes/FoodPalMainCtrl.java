@@ -219,6 +219,71 @@ public class FoodPalMainCtrl {
         });
     }
     @FXML
+    private void editServings() {
+        if (selectedRecipe == null) {
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit servings");
+
+        TextField servingsField = new TextField(String.valueOf(selectedRecipe.getServings()));
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.add(new Label("Servings:"), 0, 0);
+        grid.add(servingsField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+                int newServings = Integer.parseInt(servingsField.getText());
+                selectedRecipe.setServings(newServings);
+                server.updateRecipeServings(selectedRecipe.getId(), newServings);
+                renderRecipeDetails(selectedRecipe);
+            }
+        });
+    }
+
+    public double calculateRecipeKal(Recipe recipe) {
+        if (recipe == null || recipe.getIngredients() == null || recipe.getIngredients().isEmpty()) {
+            return 0;
+        }
+        double totalKcal = 0;
+        double totalWeight = 0;
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            Ingredient ingredient = ri.getIngredient();
+            if (ingredient == null) {
+                continue;
+            }
+            //skip ingredients with units other than g/kg
+            String unit = ri.getUnit();
+            if (!unit.equals("g") && !unit.equals("kg")) {
+                continue;
+            }
+            double amountInGrams = ri.getAmount();
+            if (unit.equals("kg")) {
+                amountInGrams *= 1000;
+            }
+            double kcalPer100g = ingredient.getProtein() * 4 + ingredient.getCarbs() * 4 + ingredient.getFat() * 9;
+            double ingredientKcal = kcalPer100g * (amountInGrams / 100.0);
+            totalKcal += ingredientKcal;
+            totalWeight += amountInGrams;
+        }
+        if (totalWeight == 0) {
+            return 0;
+        }
+        return totalKcal / totalWeight * 100;
+    }
+
+
+
+
+    @FXML
     public void refreshRecipes() {
         List<Recipe> recipesFromServer = server.getRecipes();
         allRecipes = new ArrayList<Recipe>(recipesFromServer);
@@ -316,7 +381,9 @@ public class FoodPalMainCtrl {
 
         private void renderRecipeDetails(Recipe recipe) {
         this.selectedRecipe = recipe;
-        recipeTitle.setText(recipe.getName());
+        double kcal = calculateRecipeKal(recipe);
+        recipeTitle.setText(recipe.getName() + "\n" + String.format("%.0f kcal / 100g", kcal)
+                + "  Servings: " + recipe.getServings());
         showIngredients(recipe);
 
         stepsBox.getChildren().clear();
