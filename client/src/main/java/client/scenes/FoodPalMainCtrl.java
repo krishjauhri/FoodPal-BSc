@@ -765,7 +765,6 @@ public class FoodPalMainCtrl {
         }
         }
     }
-
     private String askForNewUnit(RecipeIngredient ri) {
         while (true) {
             TextInputDialog dialog = new TextInputDialog(ri.getUnit());
@@ -783,22 +782,17 @@ public class FoodPalMainCtrl {
             return u;
         }
     }
-
     private void updateIngredientOnServer(
             Recipe recipe, RecipeIngredient ri, double amount, String unit) {
 
         server.updateIngredient(recipe.getId(), ri.getId(), amount, unit);
     }
-
     @FXML
     private void deleteSelectedIngredient() {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         RecipeIngredient selected = ingredientsList.getSelectionModel().getSelectedItem();
-
         if (recipe == null || selected == null) return;
-
         server.deleteIngredient(recipe.getId(), selected.getId());
-
         refreshRecipes();
         Recipe updated = data.stream()
                 .filter(r -> r.getId() == recipe.getId())
@@ -811,10 +805,8 @@ public class FoodPalMainCtrl {
         if(selectedRecipe == null){
             return;
         }
-
         String newName = generateUniqueName(selectedRecipe.getName());
         Recipe clone = new Recipe(newName, new ArrayList<>(), new ArrayList<>());
-
         for(RecipeIngredient oldIngredient :selectedRecipe.getIngredients()){
 
             RecipeIngredient newIngredient = new RecipeIngredient(
@@ -824,7 +816,6 @@ public class FoodPalMainCtrl {
                     oldIngredient.getUnit());
             clone.addIngredient(newIngredient);
         }
-
         for(Step oldStep : selectedRecipe.getSteps()){
             Step newStep  = new Step(
                     clone,
@@ -832,7 +823,6 @@ public class FoodPalMainCtrl {
                     oldStep.getText());
             clone.addStep(newStep);
         }
-
         try{
             Recipe savedClone = server.addRecipe(clone);
             refreshRecipes();
@@ -857,12 +847,10 @@ public class FoodPalMainCtrl {
         }
         return candidateName;
     }
-
     private boolean isNameTaken(String name){
         return data.stream()
                 .anyMatch(recipe -> recipe.getName().equals(name));
     }
-
     private void showError(String title, String message){
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle(title);
@@ -870,8 +858,6 @@ public class FoodPalMainCtrl {
         a.setContentText(message);
         a.showAndWait();
     }
-
-
     private <T> T askUntilValid(String title, String header, String content, String initialValue, Function<String, T> parser) {
         String current = initialValue == null ? "" : initialValue;
 
@@ -895,7 +881,6 @@ public class FoodPalMainCtrl {
             }
         }
     }
-
     private double askPositiveAmount(String initial) {
         Double v = askUntilValid(
                 "Amount",
@@ -911,8 +896,6 @@ public class FoodPalMainCtrl {
         if (v == null) throw new RuntimeException("Cancelled");
         return v;
     }
-
-
     private String askNonEmptyUnit(String initial) {
         String u = askUntilValid(
                 "Unit",
@@ -928,14 +911,11 @@ public class FoodPalMainCtrl {
         if (u == null) throw new RuntimeException("Cancelled");
         return u;
     }
-
-
     private boolean isValidUnit(String unit) {
         if(unit == null) return false;
         String u =  unit.trim();
         return !u.isEmpty() && u.matches(".*[A-Za-z].*");
     }
-
     @FXML
     public void showShoppingList() {
         try {
@@ -943,7 +923,6 @@ public class FoodPalMainCtrl {
                 if (myFXML == null) {
                     throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
                 }
-
                 Pair<ShoppingListCtrl, Parent> pair =
                         myFXML.load(ShoppingListCtrl.class,
                                 "client", "scenes", "ShoppingList.fxml");
@@ -959,29 +938,22 @@ public class FoodPalMainCtrl {
             e.printStackTrace();
         }
     }
-
     @FXML
     public void openShoppingOverviewForSelectedRecipe() {
         if (selectedRecipe == null) return;
-
         try {
             if (!shoppingOverviewLoaded) {
                 if (myFXML == null) {
                     throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
                 }
-
                 Pair<ShoppingListOverviewCtrl, Parent> pair =
                         myFXML.load(ShoppingListOverviewCtrl.class,
                                 "client", "scenes", "ShoppingListOverview.fxml");
-
                 shoppingOverviewCtrl = pair.getKey();
                 shoppingOverviewView = pair.getValue();
-
                 shoppingOverviewCtrl.setMainCtrl(this);
                 shoppingOverviewLoaded = true;
-
             }
-
             List<ShoppingItem> rows = selectedRecipe.getIngredients().stream()
                     .filter(ri -> ri.getIngredient() != null)
                     .map(ri -> new ShoppingItem(
@@ -991,42 +963,32 @@ public class FoodPalMainCtrl {
                             selectedRecipe.getName()
                     ))
                     .toList();
-
             shoppingOverviewCtrl.setItems(rows);
             contentPane.setCenter(shoppingOverviewView);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     public void addOverviewItemsToShoppingList(List<ShoppingItem> overviewItems) {
         if (overviewItems == null || overviewItems.isEmpty()) return;
-
         if (!shoppingListLoaded) {
             try {
                 if (myFXML == null) {
                     throw new IllegalStateException("MyFXML not set on FoodPalMainCtrl");
                 }
-
                 Pair<ShoppingListCtrl, Parent> pair =
                         myFXML.load(ShoppingListCtrl.class,
                                 "client", "scenes", "ShoppingList.fxml");
-
                 shoppingListCtrl = pair.getKey();
                 shoppingListView = pair.getValue();
                 shoppingListLoaded = true;
-
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
         }
-
         shoppingListCtrl.addItems(overviewItems);
         contentPane.setCenter(shoppingListView);
     }
-
-
 }
 
