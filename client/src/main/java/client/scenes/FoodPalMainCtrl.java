@@ -72,6 +72,15 @@ public class FoodPalMainCtrl {
     @FXML
     private TextField searchField;
 
+    @FXML
+    private ToggleButton allRecipesButton;
+
+    @FXML
+    private ToggleButton favouriteRecipesButton;
+
+    @FXML
+    private ToggleGroup filterGroup;
+
     private final RecipeSearchService recipeSearchService = new RecipeSearchService();
     private List<Recipe> allRecipes = new ArrayList<Recipe>();
 
@@ -146,9 +155,23 @@ public class FoodPalMainCtrl {
         colRecipeList.setItems(data);
         colRecipeList.setCellFactory(r -> new RecipeListViewCell(configService));
         refreshRecipes();
+
         if (searchField != null) {
             searchField.setOnAction(event -> refreshRecipes());
         }
+
+        if (filterGroup != null) {
+            filterGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) {
+                    oldVal.setSelected(true);
+                } else {
+                    refreshRecipes();
+                }
+            });
+        }
+
+        refreshRecipes();
+
         if(websocket.isConnected()) {
             websocket.subscribe("/topic/recipes", RecipeEvent.class, event -> {
                 handleServerEvent(event);
@@ -179,9 +202,10 @@ public class FoodPalMainCtrl {
         Platform.runLater(() -> {
             switch(event.type){
                 case ADD:
-                    Recipe newRecipe = new Recipe(event.name, new ArrayList<>(), new ArrayList<>());
-                    newRecipe.setId(event.id);
-                    data.add(newRecipe);
+//                    Recipe newRecipe = new Recipe(event.name, new ArrayList<>(), new ArrayList<>());
+//                    newRecipe.setId(event.id);
+//                    data.add(newRecipe);
+                    refreshRecipes();
                     break;
                 case DELETE:
                     if (configService.isFavourite(event.id)) {
@@ -193,7 +217,9 @@ public class FoodPalMainCtrl {
                         alert.setContentText("A recipe you starred was deleted by someone else and was removed from your favourites.");
                         alert.showAndWait();
                     }
-                    data.removeIf(r -> r.getId() == event.id);
+
+                    refreshRecipes();
+//                    data.removeIf(r -> r.getId() == event.id);
                     //If somebody else has the currently deleted recipe opened, we clear the view
                     if(selectedRecipe != null && selectedRecipe.getId() == event.id){
                         selectedRecipe = null;
@@ -203,14 +229,15 @@ public class FoodPalMainCtrl {
                     }
                     break;
                 case UPDATE:
-                    for (int i = 0; i < data.size(); i++) {
-                        Recipe r = data.get(i);
-                        if (r.getId() == event.id) {
-                            r.setName(event.name);
-                            data.set(i, r);
-                            break;
-                        }
-                    }
+//                    for (int i = 0; i < data.size(); i++) {
+//                        Recipe r = data.get(i);
+//                        if (r.getId() == event.id) {
+//                            r.setName(event.name);
+//                            data.set(i, r);
+//                            break;
+//                        }
+//                    }
+                    refreshRecipes();
                     if (selectedRecipe != null && selectedRecipe.getId() == event.id) {
                         recipeTitle.setText(event.name);
                     }
@@ -287,13 +314,24 @@ public class FoodPalMainCtrl {
     public void refreshRecipes() {
         List<Recipe> recipesFromServer = server.getRecipes();
         allRecipes = new ArrayList<Recipe>(recipesFromServer);
+        List <Recipe> viewFiltered;
+
+        if(favouriteRecipesButton != null && favouriteRecipesButton.isSelected()){
+            viewFiltered = allRecipes.stream()
+                    .filter(r -> configService.isFavourite(r.getId()))
+                    .toList();
+        }else{
+            viewFiltered = allRecipes;
+        }
 
         String q = "";
+
         if (searchField != null && searchField.getText() != null) {
             q = searchField.getText();
         }
 
-        List<Recipe> filtered = recipeSearchService.filter(allRecipes, q);
+        List<Recipe> filtered = recipeSearchService.filter(viewFiltered, q);
+
         data.setAll(filtered);
         colRecipeList.getSelectionModel().clearSelection();
     }

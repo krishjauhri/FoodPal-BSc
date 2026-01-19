@@ -8,6 +8,8 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -38,6 +40,16 @@
                 <VBox styleClass="pane">
                     <children>
                         <TextField fx:id="searchField" promptText="Search recipes (name, ingredients, steps)..." />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                           <children>
+                              <ToggleButton fx:id="allRecipesButton" mnemonicParsing="false" selected="true" styleClass="btn-secondary" text="All Recipes">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="filterGroup" />
+                                 </toggleGroup>
+                              </ToggleButton>
+                              <ToggleButton fx:id="favouriteRecipesButton" mnemonicParsing="false" styleClass="btn-secondary" text="Favourite Recipes" toggleGroup="$filterGroup" />
+                           </children>
+                        </HBox>
                         <ListView fx:id="colRecipeList" styleClass="recipe-list" VBox.vgrow="ALWAYS" />
                     </children>
                 </VBox>
@@ -52,7 +64,7 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="recipeTitle" styleClass="section-title" text="Select one recipe" />
                             <HBox HBox.hgrow="ALWAYS" />
-                            <Button text="Edit servings" onAction="#editServings"/>
+                            <Button onAction="#editServings" text="Edit servings" />
                             <Button onAction="#editRecipeName" styleClass="btn-secondary" text="Edit name" />
                             <Button onAction="#deleteSelectedRecipe" styleClass="btn-danger" text="Delete" />
                             <Button onAction="#downloadRecipe" styleClass="btn-secondary" text="Download" />
@@ -63,13 +75,13 @@
 
                         <VBox spacing="10" styleClass="card" VBox.vgrow="ALWAYS">
                             <children>
-                                <HBox spacing="8" alignment="CENTER_LEFT">
-                                    <Label text="Ingredients" styleClass="card-title" />
-                                    <Button mnemonicParsing="false" onAction="#openShoppingOverviewForSelectedRecipe" text="Shop" styleClass="btn-secondary"/>
-                                    <HBox HBox.hgrow="ALWAYS"/>
-                                    <Button mnemonicParsing="false" onAction="#addIngredient" text="+ Add" styleClass="btn-primary" />
-                                    <Button mnemonicParsing="false" onAction="#editSelectedIngredient" text="Edit" styleClass="btn-secondary" />
-                                    <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" text="Delete" styleClass="btn-danger" />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label styleClass="card-title" text="Ingredients" />
+                                    <Button mnemonicParsing="false" onAction="#openShoppingOverviewForSelectedRecipe" styleClass="btn-secondary" text="Shop" />
+                                    <HBox HBox.hgrow="ALWAYS" />
+                                    <Button mnemonicParsing="false" onAction="#addIngredient" styleClass="btn-primary" text="+ Add" />
+                                    <Button mnemonicParsing="false" onAction="#editSelectedIngredient" styleClass="btn-secondary" text="Edit" />
+                                    <Button mnemonicParsing="false" onAction="#deleteSelectedIngredient" styleClass="btn-danger" text="Delete" />
                                 </HBox>
 
                                 <ListView fx:id="ingredientsList" VBox.vgrow="ALWAYS" />
