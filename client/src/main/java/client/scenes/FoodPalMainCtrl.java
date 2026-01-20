@@ -88,6 +88,7 @@ public class FoodPalMainCtrl {
     ObservableList<Recipe> data;
 
     private Recipe selectedRecipe;
+    private double scaleFactor = 1.0; // client-only
     private List<Recipe> recipes;
 
 
@@ -254,7 +255,7 @@ public class FoodPalMainCtrl {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit servings");
 
-        TextField servingsField = new TextField(String.valueOf(selectedRecipe.getServings()));
+        TextField servingsField = new TextField(String.valueOf(inferServingsIfNeeded(selectedRecipe)));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -268,10 +269,18 @@ public class FoodPalMainCtrl {
 
         dialog.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
-                int newServings = Integer.parseInt(servingsField.getText());
-                selectedRecipe.setServings(newServings);
-                server.updateRecipeServings(selectedRecipe.getId(), newServings);
-                renderRecipeDetails(selectedRecipe);
+                try {
+                    int newServings = Integer.parseInt(servingsField.getText().trim());
+                    if (newServings <= 0) {
+                        showError("Invalid servings", "Servings must be > 0");
+                        return;
+                    }
+                    selectedRecipe.setServings(newServings);
+                    server.updateRecipeServings(selectedRecipe.getId(), newServings);
+                    renderRecipeDetails(selectedRecipe);
+                } catch (NumberFormatException e) {
+                    showError("Invalid servings", "Servings must be a whole number");
+                }
             }
         });
     }
@@ -284,6 +293,7 @@ public class FoodPalMainCtrl {
         double totalWeight = 0;
         for (RecipeIngredient ri : recipe.getIngredients()) {
             Ingredient ingredient = ri.getIngredient();
+
             if (ingredient == null) {
                 continue;
             }
@@ -292,11 +302,10 @@ public class FoodPalMainCtrl {
             if (!unit.equals("g") && !unit.equals("kg")) {
                 continue;
             }
-            double amountInGrams = ri.getAmount();
-            if (unit.equals("kg")) {
-                amountInGrams *= 1000;
-            }
-            double kcalPer100g = ingredient.getProtein() * 4 + ingredient.getCarbs() * 4 + ingredient.getFat() * 9;
+            String unitCheck = ri.getUnit();
+            if (!isMassUnit(unitCheck)) continue;
+            double amountInGrams = toGrams(ri.getAmount(), unitCheck);
+            double kcalPer100g = ingredient.calculateKcalPer100g();
             double ingredientKcal = kcalPer100g * (amountInGrams / 100.0);
             totalKcal += ingredientKcal;
             totalWeight += amountInGrams;
@@ -307,6 +316,22 @@ public class FoodPalMainCtrl {
         return totalKcal / totalWeight * 100;
     }
 
+    private int inferServingsIfNeeded(Recipe recipe) {
+        if (recipe == null) return 1;
+
+        int s = recipe.getServings();
+        if (s > 0) return s;
+
+        double grams = 0;
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            if (ri == null || ri.getIngredient() == null) continue;
+            if (!isMassUnit(ri.getUnit())) continue;
+            grams += toGrams(ri.getAmount(), ri.getUnit());
+        }
+
+        int inferred = (int) Math.round(grams / 250.0);
+        return Math.max(1, inferred);
+    }
 
 
 
@@ -419,10 +444,25 @@ public class FoodPalMainCtrl {
 
         private void renderRecipeDetails(Recipe recipe) {
         this.selectedRecipe = recipe;
-        double kcal = calculateRecipeKal(recipe);
-        recipeTitle.setText(recipe.getName() + "\n" + String.format("%.0f kcal / 100g", kcal)
-                + "  Servings: " + recipe.getServings());
-        showIngredients(recipe);
+            double kcalPer100g = calculateRecipeKal(recipe);
+            NutritionScaled totals = calculateTotalKcalScaled(recipe, scaleFactor);
+
+            int baseServings = inferServingsIfNeeded(recipe);
+            double scaledServings = baseServings * scaleFactor;
+
+            recipeTitle.setText(
+                    recipe.getName()
+                            + "\n" + String.format("%.0f kcal / 100g", kcalPer100g)
+                            + " | Total: " + String.format("%.0f kcal", totals.kcal())
+                            + " | P: " + String.format("%.1fg", totals.protein())
+                            + " F: " + String.format("%.1fg", totals.fat())
+                            + " C: " + String.format("%.1fg", totals.carbs())
+                            + " | Servings: " + String.format("%.1f", scaledServings)
+                            + " | Scale: x" + String.format("%.2f", scaleFactor)
+
+            );
+
+            showIngredients(recipe);
 
         stepsBox.getChildren().clear();
         if (recipe.getSteps().isEmpty()) {
@@ -454,11 +494,65 @@ public class FoodPalMainCtrl {
         ingredientsList.getItems().setAll(
                 recipe.getIngredients().stream()
                         .filter(i -> i.getIngredient() != null)
-                        .filter(i -> i.getUnit() != null)
-                        .filter(i -> i.getAmount() > 0)
                         .toList()
         );
+
+        ingredientsList.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(RecipeIngredient item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                setText(item.displayAmountScaled(scaleFactor));
+            }
+        });
     }
+
+    private static boolean isMassUnit(String u) {
+        if (u == null) return false;
+        String x = u.trim().toLowerCase();
+        return x.equals("g") || x.equals("kg");
+    }
+
+    private static double toGrams(double amount, String unit) {
+        String u = unit.trim().toLowerCase();
+        return u.equals("kg") ? amount * 1000.0 : amount;
+    }
+
+    private record NutritionScaled(double kcal, double protein, double fat, double carbs, double grams) {}
+
+    private NutritionScaled calculateTotalKcalScaled(Recipe recipe, double factor) {
+        if (recipe == null || recipe.getIngredients() == null) {
+            return new NutritionScaled(0, 0, 0, 0, 0);
+        }
+        if (!Double.isFinite(factor) || factor <= 0) factor = 1.0;
+
+        double gramsTotal = 0.0;
+        double proteinTotal = 0.0;
+        double fatTotal = 0.0;
+        double carbsTotal = 0.0;
+
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            if (ri == null || ri.getIngredient() == null) continue;
+            if (!isMassUnit(ri.getUnit())) continue;
+
+            double grams = toGrams(ri.getAmount(), ri.getUnit()) * factor;
+            gramsTotal += grams;
+
+            Ingredient ing = ri.getIngredient();
+
+            // assumes macros are per 100g
+            proteinTotal += ing.getProtein() * (grams / 100.0);
+            fatTotal     += ing.getFat()     * (grams / 100.0);
+            carbsTotal   += ing.getCarbs()   * (grams / 100.0);
+        }
+
+        double kcalTotal = 4.0 * proteinTotal + 9.0 * fatTotal + 4.0 * carbsTotal;
+        return new NutritionScaled(kcalTotal, proteinTotal, fatTotal, carbsTotal, gramsTotal);
+    }
+
 
     @FXML
     private void editRecipeName() {
@@ -534,6 +628,31 @@ public class FoodPalMainCtrl {
         }
     }
 
+    @FXML
+    private void changeScaleFactor() {
+        if (selectedRecipe == null) return;
+
+        TextInputDialog d = new TextInputDialog(String.valueOf(scaleFactor));
+        d.setTitle("Scale recipe");
+        d.setHeaderText("Enter scale factor (e.g., 0.5, 2, 3.5)");
+        d.setContentText("Scale factor:");
+
+        Optional<String> res = d.showAndWait();
+        if (res.isEmpty()) return;
+
+        String raw = res.get().trim().replace(',', '.');
+        try {
+            double f = Double.parseDouble(raw);
+            if (!Double.isFinite(f) || f <= 0) {
+                showError("Invalid factor", "Factor must be > 0");
+                return;
+            }
+            scaleFactor = f;
+            renderRecipeDetails(selectedRecipe);
+        } catch (NumberFormatException e) {
+            showError("Invalid factor", "Factor must be a number");
+        }
+    }
 
 
 
@@ -544,7 +663,7 @@ public class FoodPalMainCtrl {
         }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save recipe");
-        fileChooser.setInitialFileName(recipeTitle.getText() + ".md");
+        fileChooser.setInitialFileName(selectedRecipe.getName() + ".md");
         fileChooser.getExtensionFilters()
                 .add(new  FileChooser.ExtensionFilter("Markdown Files", "*.md"));
         File file = fileChooser.showSaveDialog(null);
@@ -559,7 +678,7 @@ public class FoodPalMainCtrl {
             }
             else {
                 for(RecipeIngredient ri : selectedRecipe.getIngredients()) {
-                    bw.write("- " + ri.getAmount() + " " + ri.getUnit() + " " + ri.getIngredient().getName());
+                    bw.write("- " + ri.displayAmountScaled(scaleFactor));
                     bw.write("\n");
                 }
             }
@@ -657,68 +776,81 @@ public class FoodPalMainCtrl {
             return;
         }
 
+            Double amount = askForFormalAmount();
+            if (amount == null) return;
 
-        Double amount;
-        while (true) {
-        TextInputDialog amountDialog = new TextInputDialog();
-        amountDialog.setTitle("Amount");
-        amountDialog.setHeaderText("Enter amount:");
-        amountDialog.setContentText("Amount (Example: 200):");
-        var amountResult = amountDialog.showAndWait();
-        if (amountResult.isEmpty()) return;
-        String raw =  amountResult.get().trim().replace(',', '.');
-        try {
-            amount = Double.parseDouble(raw);
-            if(!Double.isFinite(amount) || amount <= 0) {
-                showError("Invalid amount", "Amount must be a valid number.");
-                continue;
+            String unit = askForFormalUnit();
+            if (unit == null) return;
+
+            try {
+                server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+            } catch (Exception e) {
+                showError("Server error", "Server rejected the value, try again");
+                return;
             }
-            break;
-            }
-        catch (NumberFormatException e) {
-            showError("Invalid amount", "Amount must be a number or left empty.");
-        }
-        }
 
-        String unit;
-        TextInputDialog unitDialog = new TextInputDialog();
-        unitDialog.setTitle("Unit");
-        unitDialog.setHeaderText("Enter unit:");
-        unitDialog.setContentText("Unit (g, ml, pcs, ...):");
+            refreshRecipes();
+            Recipe updated = data.stream()
+                    .filter(r -> r.getId() == recipe.getId())
+                    .findFirst()
+                    .orElse(recipe);
+            showRecipe(updated);
 
-        while (true) {
-            var unitResult = unitDialog.showAndWait();
-            if (unitResult.isEmpty()) return;
+    }
 
-            unit = unitDialog.getEditor().getText().trim();
-            if (isValidUnit(unit)) break;
-            showError("Invalid unit", "Invalid unit, try again");
-            unitDialog.getEditor().selectAll();
-        }
+    private Double askForFormalAmount() {
+        TextInputDialog d = new TextInputDialog();
+        d.setTitle("Amount");
+        d.setHeaderText("Enter amount (number)");
+        d.setContentText("Amount:");
+        Optional<String> res = d.showAndWait();
+        if (res.isEmpty()) return null;
 
-        //sent to backend
+        String raw = res.get().trim().replace(',', '.');
         try {
-            server.addIngredient(recipe.getId(), ingredient.getId(), amount, unit);
+            double v = Double.parseDouble(raw);
+            if (!Double.isFinite(v) || v <= 0) {
+                showError("Invalid amount", "Amount must be > 0");
+                return null;
+            }
+            return v;
+        } catch (NumberFormatException e) {
+            showError("Invalid amount", "Amount must be a number");
+            return null;
         }
-        catch (Exception e) {
-            showError("Server error", "Server rejected the value, try again");
+    }
+
+    private String askForFormalUnit() {
+        TextInputDialog d = new TextInputDialog("g");
+        d.setTitle("Unit");
+        d.setHeaderText("Enter unit (e.g., g, kg)");
+        d.setContentText("Unit:");
+        Optional<String> res = d.showAndWait();
+        if (res.isEmpty()) return null;
+
+        String u = res.get().trim();
+        if (u.isEmpty()) {
+            showError("Invalid unit", "Unit cannot be empty");
+            return null;
         }
-
-        refreshRecipes();// reload UI
-        Recipe updated = data.stream()
-                .filter(r -> r.getId() == recipe.getId())
-                .findFirst()
-                .orElse(recipe);
-
-        showRecipe(updated);
+        return u;
     }
 
     @FXML
-    private void editSelectedIngredient(){
+    private void resetScale() {
+        scaleFactor = 1.0;
+        if (selectedRecipe != null) {
+            renderRecipeDetails(selectedRecipe);
+        }
+    }
+
+
+    @FXML
+    private void editSelectedIngredient() {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         RecipeIngredient selected = ingredientsList.getSelectionModel().getSelectedItem();
 
-        if(recipe == null || selected == null) return;
+        if (recipe == null || selected == null) return;
 
         Double newAmount = askForNewAmount(selected);
         if (newAmount == null) return;
@@ -727,14 +859,13 @@ public class FoodPalMainCtrl {
         if (newUnit == null) return;
 
         try {
-            updateIngredientOnServer(recipe, selected, newAmount, newUnit);
-        }
-        catch (Exception e) {
+            server.updateIngredient(recipe.getId(), selected.getId(), newAmount, newUnit);
+        } catch (Exception e) {
             showError("Server error", "Server rejected the value, try again");
             return;
         }
 
-        refreshRecipes();// reload UI
+        refreshRecipes();
         Recipe updated = data.stream()
                 .filter(r -> r.getId() == recipe.getId())
                 .findFirst()
@@ -742,6 +873,7 @@ public class FoodPalMainCtrl {
 
         showRecipe(updated);
     }
+
     private Double askForNewAmount(RecipeIngredient ri) {
         while(true) {
         TextInputDialog dialog = new TextInputDialog(String.valueOf(ri.getAmount()));
@@ -867,7 +999,7 @@ public class FoodPalMainCtrl {
             d.setHeaderText(header);
             d.setContentText(content);
             Optional<String> res = d.showAndWait();
-            if (res.isPresent()) return null;
+            if (res.isEmpty()) return null;
 
             String raw =  res.get().trim();
             try {
@@ -958,7 +1090,7 @@ public class FoodPalMainCtrl {
                     .filter(ri -> ri.getIngredient() != null)
                     .map(ri -> new ShoppingItem(
                             ri.getIngredient().getName(),
-                            ri.getAmount(),
+                            ri.getAmount() * scaleFactor,
                             ri.getUnit(),
                             selectedRecipe.getName()
                     ))

@@ -170,10 +170,10 @@ public class ServerUtils {
 
 
     public static class UpdateIngredientRequest {
-        public double amount;
+        public Double amount;
         public String unit;
 
-        public UpdateIngredientRequest(double amount, String unit) {
+        public UpdateIngredientRequest(Double amount, String unit) {
             this.amount = amount;
             this.unit = unit;
         }
@@ -198,6 +198,8 @@ public class ServerUtils {
                 .request(APPLICATION_JSON)
                 .put(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
     }
+
+
     //Add ingredient in the Ingredient interface
     public Ingredient addIngredient(Ingredient ingredient) {
         return ClientBuilder.newClient(new ClientConfig())
