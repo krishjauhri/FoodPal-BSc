@@ -23,16 +23,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 import java.util.function.Function;
-
 import javafx.util.Pair;
 import org.springframework.messaging.simp.stomp.StompSession;
 import client.utils.ConfigService;
 import javafx.scene.control.TextField;
 import client.utils.RecipeSearchService;
+import client.utils.NutritionService;
 
 public class FoodPalMainCtrl {
 
-
+    private final NutritionService nutritionService = new NutritionService();
     private final ServerUtils server;
     private final ConfigService configService;
     private Parent shoppingListView;
@@ -40,12 +40,8 @@ public class FoodPalMainCtrl {
     private ShoppingListCtrl shoppingListCtrl;
 
     private MyFXML myFXML;
-
     private final WebSocketService websocket;
     private StompSession.Subscription currentRecipeSubscription;
-
-
-
     private Node recipeView;
 
     @FXML
@@ -86,16 +82,12 @@ public class FoodPalMainCtrl {
 
 
     ObservableList<Recipe> data;
-
     private Recipe selectedRecipe;
     private double scaleFactor = 1.0; // client-only
     private List<Recipe> recipes;
-
-
     private Parent shoppingOverviewView;
     private boolean shoppingOverviewLoaded = false;
     private ShoppingListOverviewCtrl shoppingOverviewCtrl;
-
 
     @Inject
     public FoodPalMainCtrl(ServerUtils server, WebSocketService websocket, ConfigService configService) {
@@ -139,7 +131,6 @@ public class FoodPalMainCtrl {
             e.printStackTrace();
         }
     }
-
 
     /**
      * Initializes the controller after the FXML file has been loaded.
@@ -255,7 +246,9 @@ public class FoodPalMainCtrl {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit servings");
 
-        TextField servingsField = new TextField(String.valueOf(inferServingsIfNeeded(selectedRecipe)));
+        TextField servingsField = new TextField(
+                String.valueOf(nutritionService.inferServingsIfNeeded(selectedRecipe))
+        );
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -284,57 +277,6 @@ public class FoodPalMainCtrl {
             }
         });
     }
-
-    public double calculateRecipeKal(Recipe recipe) {
-        if (recipe == null || recipe.getIngredients() == null || recipe.getIngredients().isEmpty()) {
-            return 0;
-        }
-        double totalKcal = 0;
-        double totalWeight = 0;
-        for (RecipeIngredient ri : recipe.getIngredients()) {
-            Ingredient ingredient = ri.getIngredient();
-
-            if (ingredient == null) {
-                continue;
-            }
-            //skip ingredients with units other than g/kg
-            String unit = ri.getUnit();
-            if (!unit.equals("g") && !unit.equals("kg")) {
-                continue;
-            }
-            String unitCheck = ri.getUnit();
-            if (!isMassUnit(unitCheck)) continue;
-            double amountInGrams = toGrams(ri.getAmount(), unitCheck);
-            double kcalPer100g = ingredient.calculateKcalPer100g();
-            double ingredientKcal = kcalPer100g * (amountInGrams / 100.0);
-            totalKcal += ingredientKcal;
-            totalWeight += amountInGrams;
-        }
-        if (totalWeight == 0) {
-            return 0;
-        }
-        return totalKcal / totalWeight * 100;
-    }
-
-    private int inferServingsIfNeeded(Recipe recipe) {
-        if (recipe == null) return 1;
-
-        int s = recipe.getServings();
-        if (s > 0) return s;
-
-        double grams = 0;
-        for (RecipeIngredient ri : recipe.getIngredients()) {
-            if (ri == null || ri.getIngredient() == null) continue;
-            if (!isMassUnit(ri.getUnit())) continue;
-            grams += toGrams(ri.getAmount(), ri.getUnit());
-        }
-
-        int inferred = (int) Math.round(grams / 250.0);
-        return Math.max(1, inferred);
-    }
-
-
-
     @FXML
     public void refreshRecipes() {
         List<Recipe> recipesFromServer = server.getRecipes();
@@ -360,8 +302,6 @@ public class FoodPalMainCtrl {
         data.setAll(filtered);
         colRecipeList.getSelectionModel().clearSelection();
     }
-
-
     @FXML
     private void addRecipe() {
         TextInputDialog dialog = new TextInputDialog();
@@ -411,23 +351,19 @@ public class FoodPalMainCtrl {
             }
         });
     }
-
     private void deleteStep(Step step){
         server.deleteStep(selectedRecipe.getId(), step.getId());
         refreshAndReloadSelected();
     }
-
     private void refreshAndReloadSelected(){
         refreshRecipes();
     }
     public void showRecipe(Recipe recipe) {
         this.selectedRecipe = recipe;
-
         // Remove old subscription
         if (currentRecipeSubscription != null) {
             currentRecipeSubscription.unsubscribe();
         }
-
         // Subscribe to new recipe channel
         if (websocket.isConnected()) {
             String topic = "/topic/recipes/" + recipe.getId();
@@ -441,14 +377,13 @@ public class FoodPalMainCtrl {
         }
         renderRecipeDetails(recipe);
     }
-
         private void renderRecipeDetails(Recipe recipe) {
         this.selectedRecipe = recipe;
-            double kcalPer100g = calculateRecipeKal(recipe);
-            NutritionScaled totals = calculateTotalKcalScaled(recipe, scaleFactor);
+            double kcalPer100g = nutritionService.calculateRecipeKal(recipe);
+            var totals = nutritionService.calculateTotalKcalScaled(recipe, scaleFactor);
+            int baseServings = nutritionService.inferServingsIfNeeded(recipe);
 
-            int baseServings = inferServingsIfNeeded(recipe);
-            double scaledServings = baseServings * scaleFactor;
+        double scaledServings = baseServings * scaleFactor;
 
             recipeTitle.setText(
                     recipe.getName()
@@ -489,7 +424,6 @@ public class FoodPalMainCtrl {
             }
         }
     }
-
     private void showIngredients(Recipe recipe) {
         ingredientsList.getItems().setAll(
                 recipe.getIngredients().stream()
@@ -509,51 +443,6 @@ public class FoodPalMainCtrl {
             }
         });
     }
-
-    private static boolean isMassUnit(String u) {
-        if (u == null) return false;
-        String x = u.trim().toLowerCase();
-        return x.equals("g") || x.equals("kg");
-    }
-
-    private static double toGrams(double amount, String unit) {
-        String u = unit.trim().toLowerCase();
-        return u.equals("kg") ? amount * 1000.0 : amount;
-    }
-
-    private record NutritionScaled(double kcal, double protein, double fat, double carbs, double grams) {}
-
-    private NutritionScaled calculateTotalKcalScaled(Recipe recipe, double factor) {
-        if (recipe == null || recipe.getIngredients() == null) {
-            return new NutritionScaled(0, 0, 0, 0, 0);
-        }
-        if (!Double.isFinite(factor) || factor <= 0) factor = 1.0;
-
-        double gramsTotal = 0.0;
-        double proteinTotal = 0.0;
-        double fatTotal = 0.0;
-        double carbsTotal = 0.0;
-
-        for (RecipeIngredient ri : recipe.getIngredients()) {
-            if (ri == null || ri.getIngredient() == null) continue;
-            if (!isMassUnit(ri.getUnit())) continue;
-
-            double grams = toGrams(ri.getAmount(), ri.getUnit()) * factor;
-            gramsTotal += grams;
-
-            Ingredient ing = ri.getIngredient();
-
-            // assumes macros are per 100g
-            proteinTotal += ing.getProtein() * (grams / 100.0);
-            fatTotal     += ing.getFat()     * (grams / 100.0);
-            carbsTotal   += ing.getCarbs()   * (grams / 100.0);
-        }
-
-        double kcalTotal = 4.0 * proteinTotal + 9.0 * fatTotal + 4.0 * carbsTotal;
-        return new NutritionScaled(kcalTotal, proteinTotal, fatTotal, carbsTotal, gramsTotal);
-    }
-
-
     @FXML
     private void editRecipeName() {
         if(selectedRecipe == null){
@@ -591,8 +480,6 @@ public class FoodPalMainCtrl {
             }
         });
     }
-
-
     @FXML
     private void deleteSelectedRecipe() {
         if(selectedRecipe == null){
@@ -608,7 +495,6 @@ public class FoodPalMainCtrl {
         if (result.isEmpty() || result.get() != ButtonType.OK) {
             return;
         }
-
         try {
             server.deleteRecipe(selectedRecipe.getId());
             selectedRecipe = null;
@@ -627,7 +513,6 @@ public class FoodPalMainCtrl {
             alert.showAndWait();
         }
     }
-
     @FXML
     private void changeScaleFactor() {
         if (selectedRecipe == null) return;
@@ -653,9 +538,6 @@ public class FoodPalMainCtrl {
             showError("Invalid factor", "Factor must be a number");
         }
     }
-
-
-
     @FXML
     public void downloadRecipe() {
         if(selectedRecipe == null) {
@@ -698,13 +580,11 @@ public class FoodPalMainCtrl {
 
 
     }
-
     public Ingredient createNewIngredient() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("New Ingredient");
         dialog.setHeaderText("Create new ingredient");
         dialog.setContentText("Name:");
-
         Optional<String> result = dialog.showAndWait();
         if (result.isEmpty()){
             return null;
@@ -729,7 +609,6 @@ public class FoodPalMainCtrl {
     private void addIngredient() {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) return; // no recipe selected
-
         // choose an existing ingredient or create a new one
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Ingredient");
@@ -754,8 +633,6 @@ public class FoodPalMainCtrl {
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        // creating new ingredient when clicking the Add new ingredient button
         newIngredientBtn.setOnAction(event -> {
             Ingredient created = createNewIngredient();
             //first add the new ingredient into the dropdown box, then select it automatically
@@ -797,7 +674,6 @@ public class FoodPalMainCtrl {
             showRecipe(updated);
 
     }
-
     private Double askForFormalAmount() {
         TextInputDialog d = new TextInputDialog();
         d.setTitle("Amount");
@@ -819,7 +695,6 @@ public class FoodPalMainCtrl {
             return null;
         }
     }
-
     private String askForFormalUnit() {
         TextInputDialog d = new TextInputDialog("g");
         d.setTitle("Unit");
@@ -835,7 +710,6 @@ public class FoodPalMainCtrl {
         }
         return u;
     }
-
     @FXML
     private void resetScale() {
         scaleFactor = 1.0;
@@ -843,8 +717,6 @@ public class FoodPalMainCtrl {
             renderRecipeDetails(selectedRecipe);
         }
     }
-
-
     @FXML
     private void editSelectedIngredient() {
         Recipe recipe = colRecipeList.getSelectionModel().getSelectedItem();
@@ -873,7 +745,6 @@ public class FoodPalMainCtrl {
 
         showRecipe(updated);
     }
-
     private Double askForNewAmount(RecipeIngredient ri) {
         while(true) {
         TextInputDialog dialog = new TextInputDialog(String.valueOf(ri.getAmount()));
@@ -1123,4 +994,3 @@ public class FoodPalMainCtrl {
         contentPane.setCenter(shoppingListView);
     }
 }
-
