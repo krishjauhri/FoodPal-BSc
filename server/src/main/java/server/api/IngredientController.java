@@ -33,12 +33,22 @@ public class IngredientController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteIngredients(@PathVariable Long id) {
-        try{
-            ingredientService.deleteIngredientInRecipe(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<Void> deleteIngredient(@PathVariable Long id) {
+        boolean deleted = ingredientService.deleteIngredientEverywhere(id);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Ingredient> updateIngredientById(@PathVariable Long id,
+                                                           @RequestBody Ingredient ingredient) {
+        Ingredient updated = ingredientService.updateIngredientById(id, ingredient);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
+
 }
