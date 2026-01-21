@@ -955,6 +955,9 @@ public class FoodPalMainCtrl {
                 shoppingOverviewCtrl = pair.getKey();
                 shoppingOverviewView = pair.getValue();
                 shoppingOverviewCtrl.setMainCtrl(this);
+                if(shoppingOverviewCtrl != null) {
+                    shoppingOverviewCtrl.setServer(server);
+                }
                 shoppingOverviewLoaded = true;
             }
             List<ShoppingItem> rows = selectedRecipe.getIngredients().stream()
