@@ -4,32 +4,56 @@ package server.service;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Step;
+import commons.Ingredient;
 import org.springframework.stereotype.Service;
 import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
 import server.database.StepRepository;
+import server.database.IngredientRepository;
 
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final RecipeIngredientRepository ingredientRepository;
     private final StepRepository stepRepository;
+    private final IngredientRepository ingredientRepo;
 
-    public RecipeService(RecipeRepository recipeRepository, RecipeIngredientRepository ingredientRepository, StepRepository stepRepository) {
+
+    public RecipeService(RecipeRepository recipeRepository, RecipeIngredientRepository ingredientRepository, StepRepository stepRepository, IngredientRepository ingredientRepo) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.stepRepository = stepRepository;
+        this.ingredientRepo = ingredientRepo;
     }
-    public Recipe addIngredient(Long recipeId, RecipeIngredient ingredient){
+
+    public Recipe addIngredient(Long recipeId, RecipeIngredient incoming) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RuntimeException("Recipe not found"));
 
-        ingredient.setRecipe(recipe);
-        ingredientRepository.save(ingredient);
+        Ingredient ingredient = ingredientRepo.findById(
+                incoming.getIngredient().getId()
+        ).orElseThrow(() -> new IllegalArgumentException("Ingredient not found"));
 
-        recipe.getIngredients().add(ingredient);
+        if (incoming.getAmountObj() == null
+                || incoming.getUnit() == null
+                || incoming.getUnit().trim().isEmpty()) {
+            throw new IllegalArgumentException("Ingredient requires amount and unit");
+        }
+
+        RecipeIngredient ri = new RecipeIngredient(
+                recipe,
+                ingredient,
+                incoming.getAmount(),
+                incoming.getUnit()
+        );
+
+        ingredientRepository.save(ri);
+        recipe.getIngredients().add(ri);
         return recipeRepository.save(recipe);
     }
+
+
+
 
     public Recipe updateIngredient(Long recipeId, long riId, double amount, String unit) {
         Recipe recipe =  recipeRepository.findById(recipeId)

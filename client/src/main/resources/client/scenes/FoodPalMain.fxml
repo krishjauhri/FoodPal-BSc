@@ -65,6 +65,8 @@
                             <Label fx:id="recipeTitle" styleClass="section-title" text="Select one recipe" />
                             <HBox HBox.hgrow="ALWAYS" />
                             <Button onAction="#editServings" text="Edit servings" />
+                            <Button onAction="#changeScaleFactor" text="Scale" />
+                            <Button onAction="#resetScale" text="Reset scale" />
                             <Button onAction="#editRecipeName" styleClass="btn-secondary" text="Edit name" />
                             <Button onAction="#deleteSelectedRecipe" styleClass="btn-danger" text="Delete" />
                             <Button onAction="#downloadRecipe" styleClass="btn-secondary" text="Download" />

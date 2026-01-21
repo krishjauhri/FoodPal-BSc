@@ -113,19 +113,22 @@ public class RecipeController {
     public ResponseEntity<Recipe> updateIngredient(
             @PathVariable Long recipeId,
             @PathVariable Long riId,
-            @RequestBody UpdateIngredientRequest req){
+            @RequestBody UpdateIngredientRequest req) {
         try {
-            Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount, req.unit);
+            if (req.amount() == null || req.unit() == null || req.unit().trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
 
-            //websocket
+            Recipe updated = recipeService.updateIngredient(recipeId, riId, req.amount(), req.unit());
+
             message.convertAndSend("/topic/recipes/" + recipeId, updated);
             return ResponseEntity.ok(updated);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
-    public record UpdateIngredientRequest(double amount, String unit){}
+
+    public record UpdateIngredientRequest(Double amount, String unit) {}
 
     @PutMapping("/{recipeId}/steps/{stepId}")
     public ResponseEntity<Recipe> updateStep(
