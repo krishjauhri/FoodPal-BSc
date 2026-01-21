@@ -87,9 +87,11 @@ public class ShoppingListOverviewCtrl {
             @Override
             protected void updateItem(Ingredient item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null || item.getName() == null
-                        ? null
-                        : item.getName());
+                if (empty || item == null || item.getName() == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
             }
         });
 
@@ -97,9 +99,11 @@ public class ShoppingListOverviewCtrl {
             @Override
             protected void updateItem(Ingredient item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null || item.getName() == null
-                        ? null
-                        : item.getName());
+                if (empty || item == null || item.getName() == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
             }
         });
     }
@@ -185,7 +189,7 @@ public class ShoppingListOverviewCtrl {
     }
 
     @FXML
-    private void onDeleteRow() {
+    private void deleteRow() {
         ShoppingItem selected = table.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showError("No Selection", "Please select a row to delete.");

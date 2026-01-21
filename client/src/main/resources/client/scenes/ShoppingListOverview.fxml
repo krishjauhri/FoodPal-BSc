@@ -44,8 +44,8 @@
                <ComboBox fx:id="ingredientBox" prefWidth="250.0"
                          promptText="Select Ingredient"
                          HBox.hgrow="ALWAYS" />
-               <Button onAction="addRow" mnemonicParsing="false" text="Add" />
-               <Button onAction="deleteRow" mnemonicParsing="false" text="Delete" />
+               <Button onAction="#addRow" mnemonicParsing="false" text="Add" />
+               <Button onAction="#deleteRow" mnemonicParsing="false" text="Delete" />
             </buttons>
             </ButtonBar>
 
