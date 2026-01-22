@@ -127,12 +127,12 @@ public class RecipeControllerTest {
     public void updateIngredientBroadcastsUpdate() {
         long recipeId = 1L;
         long riId = 2L;
-        RecipeController.UpdateIngredientRequest req = new RecipeController.UpdateIngredientRequest(500, "g");
+        RecipeController.UpdateIngredientRequest req = new RecipeController.UpdateIngredientRequest(500.0, "g");
 
         Recipe updated = new Recipe();
         updated.setId(recipeId);
 
-        when(recipeService.updateIngredient(recipeId, riId, 500, "g")).thenReturn(updated);
+        when(recipeService.updateIngredient(recipeId, riId, 500.0, "g")).thenReturn(updated);
 
         sut.updateIngredient(recipeId, riId, req);
 

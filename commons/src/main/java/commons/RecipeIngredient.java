@@ -1,6 +1,7 @@
 package commons;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -21,7 +22,8 @@ public class RecipeIngredient {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
-    private double amount;
+
+    private Double amount;
     private String unit;
 
     public RecipeIngredient(){
@@ -62,6 +64,11 @@ public class RecipeIngredient {
     }
 
     public double getAmount() {
+        return amount == null ? 0.0 : amount;
+    }
+
+    @JsonIgnore
+    public Double getAmountObj() { // optional helper for UI
         return amount;
     }
 
@@ -70,6 +77,7 @@ public class RecipeIngredient {
             throw new IllegalArgumentException("Amount must be greater than 0.");
         }
         this.amount = amount;
+
     }
 
     public String getUnit() {
@@ -77,11 +85,11 @@ public class RecipeIngredient {
     }
 
     public void setUnit(String unit) {
-        if(unit == null) {
+        if (unit == null) {
             throw new IllegalArgumentException("Unit must not be null.");
         }
         String u = unit.trim();
-        if(u.isEmpty()) {
+        if (u.isEmpty()) {
             throw new IllegalArgumentException("Unit cannot be empty.");
         }
         this.unit = u;
@@ -99,6 +107,7 @@ public class RecipeIngredient {
         return Objects.hash(id);
     }
 
+
     @Override
     public String toString() {
 //        if (ingredient == null) return "Unknown ingredient";
@@ -107,6 +116,11 @@ public class RecipeIngredient {
     }
 
     public String displayAmount() {
+        if (ingredient == null) return "Unknown ingredient";
+        if (amount == null) return ingredient.getName();
+        if (unit == null || unit.isBlank()) return formatAmount(amount) + " " + ingredient.getName();
+
+
         double displayAmount = amount;
         String displayUnit = unit;
 
@@ -122,6 +136,30 @@ public class RecipeIngredient {
         return formatAmount(displayAmount) + " " + displayUnit + " " + ingredient.getName();
 
     }
+
+    public String displayAmountScaled(double factor) {
+        if (ingredient == null) return "Unknown ingredient";
+        if (!Double.isFinite(factor) || factor <= 0)
+            factor = 1.0;
+
+        if (amount == null) {
+            return ingredient.getName();
+        }
+
+        double scaledAmount = amount * factor;
+        String scaledUnit = unit;
+
+        if ("g".equals(scaledUnit) && scaledAmount >= 1000) {
+            scaledAmount /= 1000.0;
+            scaledUnit = "kg";
+        } else if ("ml".equals(scaledUnit) && scaledAmount >= 1000) {
+            scaledAmount /= 1000.0;
+            scaledUnit = "l";
+        }
+
+        return formatAmount(scaledAmount) + " " + scaledUnit + " " + ingredient.getName();
+    }
+
     private String formatAmount(double value) {
         if (value == Math.floor(value)) {
             return String.valueOf((int) value);
