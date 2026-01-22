@@ -16,7 +16,7 @@ public class ShoppingItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    public long id;
+    public Long id;
 
     private String ingredientName;
     private double amount;
@@ -46,7 +46,7 @@ public class ShoppingItem {
         this.sourceRecipe = sourceRecipe;
     }
 
-    public long getId() { return id; }
+    public Long getId() { return id; }
 
     public String getIngredientName() {
         return ingredientName;
@@ -63,6 +63,8 @@ public class ShoppingItem {
     public String getSourceRecipe() {
         return sourceRecipe;
     }
+
+    public void setId(Long id) { this.id = id; }
 
     public void setIngredientName(String ingredientName) {
         this.ingredientName = ingredientName;
