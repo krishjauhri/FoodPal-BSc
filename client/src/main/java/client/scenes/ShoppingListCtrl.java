@@ -88,9 +88,15 @@ public class ShoppingListCtrl {
                 String name = (item.getIngredientName() == null) ? "" : item.getIngredientName().trim();
                 String unit = (item.getUnit() == null) ? "" : item.getUnit().trim();
                 double amount = item.getAmount();
+                String source = (item.getSourceRecipe() == null) ? "" : item.getSourceRecipe().trim();
 
                 if (amount > 0 && !unit.isBlank()) {
-                    setText(amount + " " + unit + " " + name);
+                    if(source.isEmpty()){
+                        setText(amount + " " + unit + " " + name);
+                    }
+                    else{
+                        setText(amount + " " + unit + " " + name + "(" + source + ")");
+                    }
                 } else {
                     setText(name);
                 }
