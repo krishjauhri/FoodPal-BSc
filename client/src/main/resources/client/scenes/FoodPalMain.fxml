@@ -61,21 +61,23 @@
 
                     <children>
 
-                        <HBox alignment="CENTER_LEFT" spacing="10">
-                            <Label fx:id="recipeTitle" styleClass="section-title" text="Select one recipe" />
-                            <HBox HBox.hgrow="ALWAYS" />
-                            <Button onAction="#editServings" text="Edit servings" />
-                            <Button onAction="#changeScaleFactor" text="Scale" />
-                            <Button onAction="#resetScale" text="Reset scale" />
-                            <Button onAction="#editRecipeName" styleClass="btn-secondary" text="Edit name" />
-                            <Button onAction="#deleteSelectedRecipe" styleClass="btn-danger" text="Delete" />
-                            <Button onAction="#downloadRecipe" styleClass="btn-secondary" text="Download" />
-                            <Button mnemonicParsing="false" onAction="#cloneRecipe" styleClass="btn-secondary" text="Clone" />
-                        </HBox>
+                        <VBox spacing="6">
+                            <HBox spacing="8">
+                                <Button onAction="#editServings" text="Edit servings" />
+                                <Button onAction="#changeScaleFactor" text="Scale" />
+                                <Button onAction="#resetScale" text="Reset scale" />
+                                <Button onAction="#editRecipeName" styleClass="btn-secondary" text="Edit name" />
+                                <Button onAction="#deleteSelectedRecipe" styleClass="btn-danger" text="Delete" />
+                                <Button onAction="#downloadRecipe" styleClass="btn-secondary" text="Download" />
+                                <Button mnemonicParsing="false" onAction="#cloneRecipe" styleClass="btn-secondary" text="Clone" />
+                            </HBox>
+                            <Label fx:id="recipeTitle" styleClass="section-title" />
+                            <Label fx:id="recipeInfoLabel" wrapText="true" maxWidth="600" styleClass="recipe-info" />
+                        </VBox>
 
                         <Separator maxWidth="Infinity" />
 
-                        <VBox spacing="10" styleClass="card" VBox.vgrow="ALWAYS">
+                        <VBox spacing="10" styleClass="card" VBox.vgrow="NEVER" maxHeight="220">
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="8">
                                     <Label styleClass="card-title" text="Ingredients" />

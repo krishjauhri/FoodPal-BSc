@@ -392,7 +392,7 @@ public class FoodPalMainCtrl {
                             + " | P: " + String.format("%.1fg", totals.protein())
                             + " F: " + String.format("%.1fg", totals.fat())
                             + " C: " + String.format("%.1fg", totals.carbs())
-                            + " | Servings: " + String.format("%.1f", scaledServings)
+                            + "\n" + "Servings: " + String.format("%.1f", scaledServings)
                             + " | Scale: x" + String.format("%.2f", scaleFactor)
 
             );
