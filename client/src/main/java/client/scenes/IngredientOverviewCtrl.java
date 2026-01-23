@@ -104,9 +104,7 @@ public class IngredientOverviewCtrl {
     }
 
     public void setIngredients(List<Ingredient> ingredients) {
-        ingredientList.setItems(
-                FXCollections.observableArrayList(ingredients)
-        );
+        ingredientList.setItems(FXCollections.observableArrayList(ingredients));
     }
 
     @FXML
@@ -163,8 +161,7 @@ public class IngredientOverviewCtrl {
         grid.add(carbsField, 1, 3);
 
         dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes()
-                .addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
@@ -208,8 +205,7 @@ public class IngredientOverviewCtrl {
         grid.add(carbsField, 1, 3);
 
         dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes()
-                .addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
