@@ -3,47 +3,41 @@ package server.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import commons.RecipeIngredient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import commons.Recipe;
 import commons.RecipeEvent;
-import server.database.IngredientRepository;
-import server.database.RecipeRepository;
-import server.database.StepRepository;
+import server.service.IngredientService;
 import server.service.RecipeService;
 
 public class RecipeControllerTest {
 
-    private RecipeRepository repo;
     private RecipeService recipeService;
-    private IngredientRepository ingredientRepo;
-    private StepRepository stepRepo;
+    private IngredientService ingredientService;
     private SimpMessagingTemplate msgs;
 
     private RecipeController sut;
 
+
     @BeforeEach
     public void setup() {
-
-        repo = Mockito.mock(RecipeRepository.class);
         recipeService = Mockito.mock(RecipeService.class);
-        ingredientRepo = Mockito.mock(IngredientRepository.class);
-        stepRepo = Mockito.mock(StepRepository.class);
+        ingredientService = Mockito.mock(IngredientService.class);
         msgs = Mockito.mock(SimpMessagingTemplate.class);
 
-        sut = new RecipeController(repo, recipeService, ingredientRepo, stepRepo, msgs);
+        sut = new RecipeController(recipeService, ingredientService, msgs);
     }
+
 
     @Test
     public void addRecipeBroadcastsEvent() {
@@ -51,42 +45,53 @@ public class RecipeControllerTest {
         Recipe savedRecipe = new Recipe("Pizza", new ArrayList<>(), new ArrayList<>());
         savedRecipe.setId(1L);
 
-        when(repo.save(recipe)).thenReturn(savedRecipe);
+        when(recipeService.addRecipe(recipe)).thenReturn(savedRecipe);
 
         sut.add(recipe);
 
-        verify(repo).save(recipe);
-
+        verify(recipeService).addRecipe(recipe);
         verify(msgs).convertAndSend(eq("/topic/recipes"), any(RecipeEvent.class));
     }
+
 
     @Test
     public void deleteRecipeBroadcastsEvent() {
         long id = 5L;
-        when(repo.existsById(id)).thenReturn(true);
+        when(recipeService.deleteRecipe(id)).thenReturn(true);
 
-        var response = sut.deleteRecipe(id);
+        ResponseEntity<Void> response = sut.deleteRecipe(id);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(repo).deleteById(id);
-
-
+        verify(recipeService).deleteRecipe(id);
         verify(msgs).convertAndSend(eq("/topic/recipes"), any(RecipeEvent.class));
+    }
+
+    @Test
+    public void deleteRecipeNotFoundDoesNotBroadcast() {
+        long id = 5L;
+        when(recipeService.deleteRecipe(id)).thenReturn(false);
+
+        ResponseEntity<Void> response = sut.deleteRecipe(id);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(recipeService).deleteRecipe(id);
+        verify(msgs, never()).convertAndSend(eq("/topic/recipes"), any(RecipeEvent.class));
     }
 
     @Test
     public void updateRecipeBroadcastsEvent() {
         long id = 1L;
-        Recipe existing = new Recipe("Old Name", new ArrayList<>(), new ArrayList<>());
-        existing.setId(id);
+        Recipe saved = new Recipe("New Name", new ArrayList<>(), new ArrayList<>());
+        saved.setId(id);
 
         Recipe updateInfo = new Recipe("New Name", null, null);
 
-        when(repo.findById(id)).thenReturn(Optional.of(existing));
-        when(repo.save(any(Recipe.class))).thenReturn(existing);
+        when(recipeService.updateRecipeName(id, "New Name")).thenReturn(saved);
 
-        sut.updateRecipe(id, updateInfo);
+        ResponseEntity<Recipe> response = sut.updateRecipe(id, updateInfo);
 
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(recipeService).updateRecipeName(id, "New Name");
         verify(msgs).convertAndSend(eq("/topic/recipes"), any(RecipeEvent.class));
     }
 

@@ -7,9 +7,7 @@ import commons.Step;
 import commons.RecipeEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.database.IngredientRepository;
-import server.database.RecipeRepository;
-import server.database.StepRepository;
+import server.service.IngredientService;
 import server.service.RecipeService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -19,25 +17,21 @@ import java.util.List;
 @RequestMapping("/api/recipes")
 public class RecipeController {
 
-    private final RecipeRepository repo;
     private final RecipeService recipeService;
-    private final IngredientRepository ingredientRepository;
-    private final StepRepository stepRepository;
     private final SimpMessagingTemplate message;
+    private final IngredientService ingredientService;
 
-    public RecipeController(RecipeRepository repo, RecipeService recipeService,
-                            IngredientRepository ingredientRepository, StepRepository stepRepository,
+    public RecipeController(RecipeService recipeService,
+                            IngredientService ingredientService,
                             SimpMessagingTemplate message) {
-        this.repo = repo;
         this.recipeService = recipeService;
-        this.ingredientRepository = ingredientRepository;
-        this.stepRepository = stepRepository;
+        this.ingredientService = ingredientService;
         this.message = message;
     }
 
     @PostMapping
     public Recipe add(@RequestBody Recipe recipe) {
-        Recipe savedRecipe = repo.save(recipe);
+        Recipe savedRecipe = recipeService.addRecipe(recipe);
         message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.ADD,
                 savedRecipe.getId(), savedRecipe.getName()));
         return savedRecipe;
@@ -45,7 +39,7 @@ public class RecipeController {
 
     @GetMapping
     public List<Recipe> getAll() {
-        return repo.findAll();
+        return recipeService.getAllRecipes();
     }
 
     @PostMapping("/{recipeId}/ingredients")
@@ -80,34 +74,37 @@ public class RecipeController {
 
     @PostMapping("/ingredients")
     public Ingredient createIngredient(@RequestBody Ingredient ingredient) {
-        return ingredientRepository.save(ingredient);
+        return ingredientService.createIngredient(ingredient);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Recipe> updateRecipe(@PathVariable long id,
                                                @RequestBody Recipe updated) {
-        return repo.findById(id)
-                .map(existing -> {
-                    existing.setName(updated.getName());
-                    Recipe savedRecipe = repo.save(existing);
-                    message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE,
-                            savedRecipe.getId(), savedRecipe.getName()));
-                    message.convertAndSend("/topic/recipes/" + id, savedRecipe);
-                    return ResponseEntity.ok(savedRecipe);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+
+        Recipe savedRecipe = recipeService.updateRecipeName(id, updated.getName());
+        if (savedRecipe == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.UPDATE,
+                savedRecipe.getId(), savedRecipe.getName()));
+        message.convertAndSend("/topic/recipes/" + id, savedRecipe);
+
+        return ResponseEntity.ok(savedRecipe);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
-        if (!repo.existsById(id)) {
+        boolean deleted = recipeService.deleteRecipe(id);
+        if (!deleted) {
             return ResponseEntity.notFound().build();
         }
-        repo.deleteById(id);
 
         message.convertAndSend("/topic/recipes", new RecipeEvent(RecipeEvent.Type.DELETE, id, null));
         return ResponseEntity.noContent().build();
     }
+
 
     @PutMapping("/{recipeId}/ingredients/{riId}")
     public ResponseEntity<Recipe> updateIngredient(

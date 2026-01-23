@@ -1,14 +1,15 @@
 package server.service;
 
 
+import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.Step;
-import commons.Ingredient;
 import org.springframework.stereotype.Service;
 import server.database.RecipeIngredientRepository;
 import server.database.RecipeRepository;
 import server.database.StepRepository;
+import java.util.List;
 import server.database.IngredientRepository;
 
 @Service
@@ -128,6 +129,28 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(id).orElseThrow();
         recipe.setServings(servings);
         return recipeRepository.save(recipe);
+    }
+
+    public Recipe addRecipe(Recipe recipe) {
+        return recipeRepository.save(recipe);
+    }
+
+    public List<Recipe> getAllRecipes() {
+        return recipeRepository.findAll();
+    }
+
+    public Recipe updateRecipeName(long id, String newName) {
+        Recipe existing = recipeRepository.findById(id).orElse(null);
+        if (existing == null) return null;
+
+        existing.setName(newName);
+        return recipeRepository.save(existing);
+    }
+
+    public boolean deleteRecipe(long id) {
+        if (!recipeRepository.existsById(id)) return false;
+        recipeRepository.deleteById(id);
+        return true;
     }
 
 
