@@ -28,6 +28,7 @@ import java.util.List;
 import commons.Ingredient;
 import commons.Step;
 import commons.RecipeIngredient;
+import commons.ShoppingItem;
 import org.glassfish.jersey.client.ClientConfig;
 
 import commons.Quote;
@@ -280,6 +281,38 @@ public class ServerUtils {
         ClientBuilder.newClient(new ClientConfig())
                 .target(SERVER)
                 .path("api/recipes/" + recipeId + "/steps/" + stepId)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
+
+    public List<ShoppingItem> getShoppingList() {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/shopping-list")
+                .request(APPLICATION_JSON)
+                .get(new GenericType<List<ShoppingItem>>() {});
+    }
+
+    public ShoppingItem addShoppingItem(ShoppingItem item) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/shopping-list")
+                .request(APPLICATION_JSON)
+                .post(Entity.entity(item, APPLICATION_JSON), ShoppingItem.class);
+    }
+
+    public ShoppingItem updateShoppingItem(ShoppingItem item) {
+        return ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/shopping-list/" + item.id) // item.id is now a Long
+                .request(APPLICATION_JSON)
+                .put(Entity.entity(item, APPLICATION_JSON), ShoppingItem.class);
+    }
+
+    public void deleteShoppingItem(Long id) {
+        ClientBuilder.newClient(new ClientConfig())
+                .target(SERVER)
+                .path("api/shopping-list/" + id)
                 .request(APPLICATION_JSON)
                 .delete();
     }

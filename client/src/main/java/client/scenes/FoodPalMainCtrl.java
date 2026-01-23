@@ -996,6 +996,9 @@ public class FoodPalMainCtrl {
                 return;
             }
         }
+        for(ShoppingItem sit : overviewItems){
+            server.addShoppingItem(sit);
+        }
         shoppingListCtrl.addItems(overviewItems);
         contentPane.setCenter(shoppingListView);
     }
