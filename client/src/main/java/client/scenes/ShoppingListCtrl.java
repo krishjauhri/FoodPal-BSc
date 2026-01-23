@@ -32,6 +32,7 @@ public class ShoppingListCtrl {
     public void setServer(ServerUtils server){
         this.server = server;
         loadIngredients();
+        refreshShoppingList();
     }
 
     private void loadIngredients() {
@@ -40,6 +41,15 @@ public class ShoppingListCtrl {
             ingredientBox.setItems(FXCollections.observableArrayList(serverIngredients));
         } catch (Exception e) {
             showError("Connection Error", "Could not fetch ingredients.");
+        }
+    }
+
+    public void refreshShoppingList() {
+        try {
+            List<ShoppingItem> serverItems = server.getShoppingList();
+            items.setAll(serverItems);
+        } catch (Exception e) {
+            showError("Connection Error", "Could not fetch shopping list items.");
         }
     }
 
@@ -88,9 +98,15 @@ public class ShoppingListCtrl {
                 String name = (item.getIngredientName() == null) ? "" : item.getIngredientName().trim();
                 String unit = (item.getUnit() == null) ? "" : item.getUnit().trim();
                 double amount = item.getAmount();
+                String source = (item.getSourceRecipe() == null) ? "" : item.getSourceRecipe().trim();
 
                 if (amount > 0 && !unit.isBlank()) {
-                    setText(amount + " " + unit + " " + name);
+                    if(source.isEmpty()){
+                        setText(amount + " " + unit + " " + name);
+                    }
+                    else{
+                        setText(amount + " " + unit + " " + name + "(" + source + ")");
+                    }
                 } else {
                     setText(name);
                 }
@@ -117,8 +133,13 @@ public class ShoppingListCtrl {
         if (unit == null) return;
 
         ShoppingItem newItem = new ShoppingItem(selectedIngredient.getName(), amount, unit);
-        items.add(newItem);
-        ingredientBox.setValue(null);
+        try {
+            ShoppingItem savedItem = server.addShoppingItem(newItem);
+            items.add(savedItem);
+            ingredientBox.setValue(null);
+        } catch (Exception e) {
+            showError("Server Error", "Could not save shopping item to server.");
+        }
     }
 
     private Ingredient askForIngredient() {
@@ -265,11 +286,20 @@ public class ShoppingListCtrl {
     @FXML
     private void removeSelected() {
         ShoppingItem selected = shoppingListView.getSelectionModel().getSelectedItem();
-        if (selected != null) items.remove(selected);
+        if (selected == null) return;
+        try {
+            server.deleteShoppingItem(selected.id);
+            items.remove(selected);
+        } catch (Exception e) {
+            showError("Server Error", "Could not delete item from server.");
+        }
     }
 
     @FXML
     private void resetList() {
+        for(ShoppingItem sit : items){
+            server.deleteShoppingItem(sit.getId());
+        }
         items.clear();
     }
 
