@@ -131,7 +131,12 @@ public class IngredientOverviewCtrl {
     }
 
 
-
+    /**Use of Generative AI:
+     * To display all the inputs in one dialog, I asked chatgpt to generate 147-176 lines of codes,
+     * After studying this implementation, I understood the approach and
+     * independently implemented similar methods (addIngredient in this controller and
+     * addIngredient in FoodPalMainCtrl).
+     */
     @FXML
     public void editIngredient() {
         Ingredient selected = ingredientList.getSelectionModel().getSelectedItem();
@@ -140,7 +145,7 @@ public class IngredientOverviewCtrl {
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Edit nutrition");
+        dialog.setTitle("Edit Ingredient");
 
         TextField nameField = new TextField(selected.getName());
         TextField proteinField = new TextField(String.valueOf(selected.getProtein()));
