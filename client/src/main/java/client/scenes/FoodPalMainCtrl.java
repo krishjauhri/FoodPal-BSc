@@ -377,6 +377,11 @@ public class FoodPalMainCtrl {
         }
         renderRecipeDetails(recipe);
     }
+    /** In writing this method, in order to understand the requirements better for how recipe scaling should
+     * be displayed and stored only client-side, I used ChatGPT.
+     * The implementation of this was done by me.
+     * date: Tuesday, 20th of January.
+    **/
         private void renderRecipeDetails(Recipe recipe) {
         this.selectedRecipe = recipe;
             double kcalPer100g = nutritionService.calculateRecipeKal(recipe);
@@ -513,6 +518,12 @@ public class FoodPalMainCtrl {
             alert.showAndWait();
         }
     }
+
+    /**
+     * In writing this method I used chatGPT to understand how to validate the scale factor
+     * and update it in the recipe view.
+     * date: Tuesday, 20th of January
+     **/
     @FXML
     private void changeScaleFactor() {
         if (selectedRecipe == null) return;
